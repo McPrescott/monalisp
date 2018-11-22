@@ -33,7 +33,7 @@ export const pipe: Pipe = (...fns) => (arg: any) => (
 );
 
 
-export const invertPredicate = curry(
+export const invertPred = curry(
   (predicate: Pred, arg: any) => (
     !predicate(arg)
   )
