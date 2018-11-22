@@ -1,0 +1,26 @@
+{
+  "name": "monalisp",
+  "version": "0.0.0",
+  "description": "Custom lisp for Monagen.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Everything's all good!\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "./"
+  },
+  "keywords": [
+    "lisp",
+    "monagen",
+    "monalisp",
+    "image",
+    "2D"
+  ],
+  "author": "mcprescott",
+  "license": "MIT",
+  "dependencies": {
+    "@types/ramda": "^0.25.42",
+    "ramda": "^0.25.0"
+  }
+}

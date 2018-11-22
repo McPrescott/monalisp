@@ -1,3 +1,4 @@
+import {not} from 'ramda';
 import {Curry} from './typings/curry';
 import {Pipe} from './typings/pipe';
 
@@ -33,11 +34,7 @@ export const pipe: Pipe = (...fns) => (arg: any) => (
 );
 
 
-export const invertPred = curry(
-  (predicate: Pred, arg: any) => (
-    !predicate(arg)
-  )
-);
+export const invertPred = (predicate: Pred) => pipe(predicate, not);
 
 
 // -- Temp ---------------------------------------------------------------------
