@@ -1,4 +1,4 @@
-import {NL, NULL} from "./common-characters";
+import {NL, NULL} from "./common/chars";
 
 
 export type State = {
