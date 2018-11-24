@@ -10,7 +10,7 @@ export const empty = "";
 /**
  * Test if two strings are identical (uses strict equals `===`).
  */
-export const is = curry((test: string, str: string) => (
+export const isChar = curry((test: string, str: string) => (
   test === str
 ));
 
@@ -18,7 +18,7 @@ export const is = curry((test: string, str: string) => (
 /**
  * Test if two strings are not identical (uses strict inequality `!==`).
  */
-export const isNot = curry((test: string, str: string) => (
+export const isNotChar = curry((test: string, str: string) => (
   test !== str
 ));
 
@@ -69,3 +69,21 @@ export const codeAt = curry((pos: number, str: string) => (
 export const charRange = curry((lower: string, upper: string) => (
   map(fromCode, range(codeOf(lower), codeOf(upper)+1))
 ));
+
+
+/**
+ * Parse integer from *string*, with optional *base*. If *base* is not
+ * supplied, strings with a prefix of '0x' are considered hexadecimal. All other
+ * strings are considered decimal.
+ */
+export const toInt = (string: string, base?: number) => (
+  Number.parseInt(string, base)
+);
+
+
+/**
+ * Parse decimal from *string*.
+ */
+export const toFloat = (string: string) => (
+  Number.parseFloat
+);

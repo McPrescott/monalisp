@@ -1,8 +1,12 @@
-import {curry, map} from 'ramda';
-import Failure from '../base/failure';
-import {isStr, log} from '../util';
-import {charRange, empty, is} from './string-util';
+import {curry, is, map} from 'ramda';
+import {Failure} from '../base';
+import {isStr, log, Unary, Binary} from '../util';
+import {charRange, empty, isChar, toInt} from './string-util';
 import {CharStream} from './char-stream';
+
+
+type ParseFn = (stream: CharStream) => Result;
+type Result = any | ParseFailure;
 
 
 
@@ -16,27 +20,53 @@ export class ParseFailure extends Failure{
   }
 
   constructor(public message: string) {
-    super(message);
+    super();
   }
 }
-
-
-
-type Parse<T=string> = (stream: CharStream) => Result<T>;
-type Result<T=string> = T | ParseFailure;
 
 
 
 /**
  * Type wrapper around a parser function.
  */
-export class Parser<T=string> {
+export class Parser {
   
-  static of<T>(run: Parse<T>): Parser<T> {
+  /**
+   * Return `Parser` that ignores given *stream* and returns given *value*.
+   */
+  static return(value: any) {
+    return Parser.of((stream) => value );
+  }
+
+  /**
+   * Static constructor function.
+   */
+  static of(run: ParseFn): Parser {
     return new Parser(run);
   }
 
-  constructor(public run: Parse<T>) {};
+  constructor(public run: ParseFn) {};
+
+  /**
+   * Return wrapping `Parser` that maps *fn* over successfully parsed value.
+   */
+  map(fn: Unary): Parser {
+    return Parser.of((stream) => {
+      const result = run(this, stream);
+      return (is(ParseFailure, result)) ? result : fn(result);
+    });
+  }
+
+  /**
+   * Return `Parser` that applies the successful result of *parser* to the
+   * successful result of *this*.
+   */
+  apply(parser: Parser): Parser {
+    return Parser.of((stream) => {
+      const result = run(this, stream);
+      return result(run(parser, stream));
+    });
+  }
 }
 
 
@@ -48,14 +78,13 @@ export const run = curry((parser: Parser, stream: CharStream) =>
 );
 
 
-
 /**
  * Return single character parser.
  */
 export const pchar = (char: string) => (
   Parser.of((stream: CharStream) => {
     let next = stream.peek();
-    if (is(char, next))
+    if (isChar(char, next))
       return stream.next();
     return ParseFailure.of(`Failed to parse "${char}"`);
   })
@@ -68,7 +97,7 @@ export const pchar = (char: string) => (
 export const andThen = (parsers: Parser[]) => (
   Parser.of((stream) => {
     let parsed = empty;
-    let current: string | ParseFailure;
+    let current: Result;
     for (const parser of parsers) {
       current = run(parser, stream);
       if (current instanceof ParseFailure)
@@ -86,7 +115,7 @@ export const andThen = (parsers: Parser[]) => (
  */
 export const orElse = (parsers: Parser[]) => (
   Parser.of((stream) => {
-    let current: string | ParseFailure;
+    let current: Result;
     for (const parser of parsers) {
       current = run(parser, stream);
       if (isStr(current))
@@ -100,17 +129,36 @@ export const orElse = (parsers: Parser[]) => (
 /**
  * Return `Parser` for any of *chars*.
  */
-export const anyOf = (chars: string[]) => (
+export const anyOf = (chars: string[]): Parser => (
   orElse(map(pchar, chars))
 );
 
 
+/**
+ * Return `Parser` of given *searchString*.
+ */
+export const pstring = (searchString: string): Parser => (
+  andThen(map(pchar, searchString))
+);
+
+
+const liftTwo = curry((fn: Binary, x, y) => (
+  Parser.return(fn).apply(x).apply(y)
+));
+
+
+const add = curry((x: number, y: number) => x + y);
+
+const addP = liftTwo(add)
+
 const pLower = anyOf(charRange('a', 'z'));
 const pDigit = anyOf(charRange('0', '9'));
+const pInt = pDigit.map(toInt);
 
-const source = 'l9ma';
+
+const source = '58this and some more words';
 const stream = new CharStream(source);
-const parser = andThen([pLower, pDigit]);
+const parser = addP(pInt, pInt);
 const result = run(parser, stream);
 
 log(result);
