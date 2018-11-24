@@ -1,3 +1,19 @@
+/**
+ * Return curried equivalent to provided function *fn*.
+ */
+export const curry: Curry = (fn) => {
+  const arity = fn.length;
+  
+  return function inner(...args){
+    if (args.length >= arity)
+      return fn.apply(null, args);
+    
+    return (...moreArgs) => inner(...args, ...moreArgs);
+  }
+}
+
+
+
 export interface Curry {
   <T extends any[], R>(func: (...args: T) => R): {
     1: CurriedOne<T[0], R>;
@@ -15,20 +31,24 @@ export interface Curry {
   : T extends [any, any, any, any, any, any]? 6 : 7];
 }
 
+
 export interface CurriedOne<T1, R> {
   (arg: T1): R;
 }
+
 
 export interface CurriedTwo<T1, T2, R> {
   (arg: T1): CurriedOne<T2, R>;
   (...args: [T1, T2]): R;
 }
 
+
 export interface CurriedThree<T1, T2, T3, R> {
   (arg: T1): CurriedTwo<T2, T3, R>;
   (...args: [T1, T2]): CurriedOne<T3, R>;
   (...args: [T1, T2, T3]): R;
 }
+
 
 export interface CurriedFour<T1, T2, T3, T4, R> {
   (arg: T1): CurriedThree<T2, T3, T4, R>;
@@ -37,6 +57,7 @@ export interface CurriedFour<T1, T2, T3, T4, R> {
   (...args: [T1, T2, T3, T4]): R;
 }
 
+
 export interface CurriedFive<T1, T2, T3, T4, T5, R> {
   (arg: T1): CurriedFour<T2, T3, T4, T5, R>;
   (...args: [T1, T2]): CurriedThree<T3, T4, T5, R>;
@@ -44,6 +65,7 @@ export interface CurriedFive<T1, T2, T3, T4, T5, R> {
   (...args: [T1, T2, T3, T4]): CurriedOne<T5, R>;
   (...args: [T1, T2, T3, T4, T5]): R;
 }
+
 
 export interface CurriedSix<T1, T2, T3, T4, T5, T6, R> {
   (arg: T1): CurriedFive<T2, T3, T4, T5, T6, R>;

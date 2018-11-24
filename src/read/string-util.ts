@@ -4,7 +4,7 @@ import {curry, map, range} from 'ramda';
 /**
  * Empty string value.
  */
-export const empty = "";
+export const emptyString = "";
 
 
 /**

@@ -31,6 +31,13 @@ export class CharStream {
   }
 
   /**
+   * Remaining portion of source string.
+   */
+  get rest() {
+    return this.source.slice(this.pos);
+  }
+
+  /**
    * Return current character, updating internal state.
    */
   next() {
