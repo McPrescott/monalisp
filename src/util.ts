@@ -1,43 +1,37 @@
-import {not} from 'ramda';
-import {Curry} from './typings/curry';
-import {Pipe} from './typings/pipe';
-
+import {curry, not} from 'ramda';
 
 
 // -- Function Types -----------------------------------------------------------
 
 export type AnyFn = (...args: any[]) => any;
 export type Unary<T=any, R=T> = (arg: T) => R;
-export type Pred<T=any> = (arg: T) => boolean;
+export type UnaryPred<T> = (arg: T) => boolean;
+export type GenericPred = <T extends any[]>(...args: T) => boolean;
 export type ArgType<T extends AnyFn> = (
   T extends ((...x: infer A) => any) ? A : never
 );
 
 
+
 // -- Misc Functions -----------------------------------------------------------
 
 
-export const curry: Curry = (fn) => {
-  const arity = fn.length;
-  
-  return function inner(...args: any[]){
-    if (args.length >= arity)
-      return fn.apply(null, args);
-    
-    return (...moreArgs: any[]) => inner(...args, ...moreArgs);
-  };
-};
+export const isStr = (value: any) => typeof value === 'string';
 
 
-export const pipe: Pipe = (...fns) => (arg: any) => (
-  fns.reduce((prev, current) => current(prev), arg)
-);
+export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
+  not(predicate(value))
+));
 
-
-export const invertPred = (predicate: Pred) => pipe(predicate, not);
 
 
 // -- Temp ---------------------------------------------------------------------
+
+
+// export const pipe: Pipe = (...fns) => (arg: any) => (
+//   fns.reduce((prev, current) => current(prev), arg)
+// );
+
 
 export const quote = (str: string) => `"${str}"`;
 

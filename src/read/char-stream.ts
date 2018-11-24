@@ -1,7 +1,7 @@
-import {NL, NULL} from "./chars";
+import {NL, NULL} from "./common-characters";
 
 
-type State = {
+export type State = {
   pos: number;
   line: number;
   col: number;
