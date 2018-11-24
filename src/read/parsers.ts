@@ -1,77 +1,116 @@
-import {curry, invertPred, Pred} from '../util';
+import {curry, map} from 'ramda';
+import Failure from '../base/failure';
+import {isStr, log} from '../util';
+import {charRange, empty, is} from './string-util';
 import {CharStream} from './char-stream';
 
-type StringTest = RegExp | string;
-type Parser = (stream: CharStream) => string;
 
 
-export const empty = "";
+/**
+ * Parsing failure type.
+ */
+export class ParseFailure extends Failure{
 
-
-export const is = curry((test: string, str: string) => (
-  test === str
-));
-
-
-export const isNot = curry((test: string, str: string) => (
-  test !== str
-));
-
-
-export const test = curry((test: StringTest, str: string) => (
-  str.search(test) !== -1
-));
-
-
-export const testNot = curry((test: StringTest, str: string) => (
-  str.search(test) === -1
-));
-
-
-export const parseChar = curry((char: string, stream: CharStream) => {
-  let next = stream.next();
-  if (is(char, next))
-    return char;
-  return '';
-});
-
-
-export const parseWhile = curry((pred: Pred<string>, stream: CharStream) => {
-  let parsed = empty;
-  while (pred(stream.peek())) {
-    parsed += stream.next();
+  static of(message: string) {
+    return new ParseFailure(message);
   }
-  return parsed;
-});
+
+  constructor(public message: string) {
+    super(message);
+  }
+}
 
 
-export const parseWhileMatch = curry((regexp: RegExp, stream: CharStream) => {
-  return parseWhile(test(regexp));
-});
+
+type Parse<T=string> = (stream: CharStream) => Result<T>;
+type Result<T=string> = T | ParseFailure;
 
 
-export const parseUntil = curry((pred: Pred<string>, stream: CharStream) => {
-  return parseWhile(invertPred(pred), stream);
-});
+
+/**
+ * Type wrapper around a parser function.
+ */
+export class Parser<T=string> {
+  
+  static of<T>(run: Parse<T>): Parser<T> {
+    return new Parser(run);
+  }
+
+  constructor(public run: Parse<T>) {};
+}
 
 
-export const parseBetween = curry((start: string, end: string, stream: CharStream) => {
-  let parsed = empty;
-  if (isNot(start, stream.peek()))
+/**
+ * Run *parser* with given *stream*.
+ */
+export const run = curry((parser: Parser, stream: CharStream) => 
+  parser.run(stream)
+);
+
+
+
+/**
+ * Return single character parser.
+ */
+export const pchar = (char: string) => (
+  Parser.of((stream: CharStream) => {
+    let next = stream.peek();
+    if (is(char, next))
+      return stream.next();
+    return ParseFailure.of(`Failed to parse "${char}"`);
+  })
+);
+
+
+/**
+ * Sequentially run *parsers*, return parsed string or `ParseFailure`.
+ */
+export const andThen = (parsers: Parser[]) => (
+  Parser.of((stream) => {
+    let parsed = empty;
+    let current: string | ParseFailure;
+    for (const parser of parsers) {
+      current = run(parser, stream);
+      if (current instanceof ParseFailure)
+        return current;
+      parsed += current;
+    }
     return parsed;
-  const isNotEnd = isNot(end);
-  stream.skip();
-  let next;
-  while ((next = stream.peek()) && isNotEnd(next)) {
-    parsed += stream.next();
-  }
-  stream.skip();
-  return parsed;
-});
+  })
+);
 
 
-export const parseSeq = curry((parsers: Parser[], stream: CharStream) => (
-  parsers.reduce((parsed, parse) => (
-    parsed.concat(parse(stream))
-  ), empty)
-));
+/**
+ * Sequentially run *parsers*, until a parser succeeds or end of list returning
+ * the last `ParseFailure`.
+ */
+export const orElse = (parsers: Parser[]) => (
+  Parser.of((stream) => {
+    let current: string | ParseFailure;
+    for (const parser of parsers) {
+      current = run(parser, stream);
+      if (isStr(current))
+        return current;
+    }
+    return current;
+  })
+);
+
+
+/**
+ * Return `Parser` for any of *chars*.
+ */
+export const anyOf = (chars: string[]) => (
+  orElse(map(pchar, chars))
+);
+
+
+const pLower = anyOf(charRange('a', 'z'));
+const pDigit = anyOf(charRange('0', '9'));
+
+const source = 'l9ma';
+const stream = new CharStream(source);
+const parser = andThen([pLower, pDigit]);
+const result = run(parser, stream);
+
+log(result);

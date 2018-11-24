@@ -28,12 +28,8 @@ export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
 // -- Temp ---------------------------------------------------------------------
 
 
-// export const pipe: Pipe = (...fns) => (arg: any) => (
-//   fns.reduce((prev, current) => current(prev), arg)
-// );
-
-
 export const quote = (str: string) => `"${str}"`;
+
 
 export const log = (...args) => {
   args.forEach((arg) => {
