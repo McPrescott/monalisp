@@ -3,17 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-// TODO:
-//   + emptyString -> String.id | String.empty
-
-
 import {curry, map, range} from 'ramda';
-
-
-/**
- * Empty string value.
- */
-export const emptyString = "";
 
 
 /**

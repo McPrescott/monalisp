@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "/jmcp/docs"
+		},
+		{
+			"path": "/jmcp/log"
 		}
 	],
 	"settings": {}

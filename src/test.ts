@@ -39,7 +39,3 @@ const result = run(parser, stream);
 
 log('! Parsed:', result);
 log('! Remain:', stream.rest);
-
-interface StringConstructor {
-  isNullOrEmpty(str: string): boolean;
-}

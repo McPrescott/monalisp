@@ -4,6 +4,7 @@ import {Failure} from './base';
 
 // -- Function Types -----------------------------------------------------------
 
+
 export type AnyFn = (...args: any[]) => any;
 export type Unary<T=any, R=T> = (arg: T) => R;
 export type Binary<T0=any, T1=T0, R=T0> = (...args: [T0, T1]) => R;
@@ -16,6 +17,20 @@ export type ArgsOf<T extends AnyFn> = (
 export type ReturnOf<T extends AnyFn> = (
   T extends ((...x: any[]) => (infer R)) ? R : never
 );
+
+
+
+// -- Builtin Extensions -------------------------------------------------------
+
+
+// @ts-ignore
+Number.empty = Number.prototype.empty = 0;
+
+// @ts-ignore
+String.empty = String.prototype.empty = '';
+
+// @ts-ignore
+Array.empty = Array.prototype.empty = [];
 
 
 

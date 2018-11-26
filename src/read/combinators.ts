@@ -8,10 +8,21 @@
 
 import {map} from 'ramda';
 import {curry} from '../~functional';
-import {isStr} from '../util';
+import {isStr, UnaryPred} from '../util';
 import {Parser, ParseFailure, Result, run, didParseSucceed, didParseFail} from './parser';
-import {isChar, emptyString} from './string-util';
+import {isChar} from './string-util';
 
+
+/**
+ * Return character `Parser`, that succeeds according to *predicate*.
+ */
+export const satisfy = (predicate: UnaryPred<string>) => (
+  Parser.of((stream) => (
+    (predicate(stream.peek()))
+      ? stream.next()
+      : ParseFailure.of(`"${stream.peek()}" does not satisfy given predicate.`)
+  ))
+);
 
 
 /**
@@ -32,7 +43,7 @@ export const pchar = (char: string) => (
  */
 export const andThen = (parsers: Parser[]) => (
   Parser.of((stream) => {
-    let parsed = emptyString;
+    let parsed = String.empty;
     let current: Result;
     for (const parser of parsers) {
       current = run(parser, stream);
@@ -118,7 +129,7 @@ export const oneOrMore = (parser: Parser) => (
 export const opt = (parser: Parser) => (
   Parser.of((stream) => {
     let result = run(parser, stream);
-    return (didParseSucceed(result)) ? result : emptyString;
+    return (didParseSucceed(result)) ? result : String.empty;
   })
 );
 

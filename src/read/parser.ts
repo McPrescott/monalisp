@@ -62,11 +62,11 @@ export class Parser {
   /**
    * Static constructor function.
    */
-  static of(run: ParseFn): Parser {
-    return new Parser(run);
+  static of(run: ParseFn, label?: string): Parser {
+    return new Parser(run, label);
   }
 
-  constructor(public run: ParseFn) {};
+  constructor(public run: ParseFn, public label?: string) {};
 
   /**
    * Return wrapping `Parser` that maps *fn* over successfully parsed value.
