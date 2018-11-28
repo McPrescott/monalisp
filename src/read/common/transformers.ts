@@ -13,6 +13,30 @@ export const toInt = (string: string, base?: number) => (
 
 
 /**
+ * Parse hexadecimal string into number.
+ */
+export const hexStringToNumber = (hexString: string) => (
+  Number.parseInt(hexString, 16)
+);
+
+
+/**
+ * Parse octal string into number.
+ */
+export const octalStringToNumber = (octalString: string) => (
+  Number.parseInt(octalString, 8)
+);
+
+
+/**
+ * Parse octal string into number.
+ */
+export const binaryStringToNumber = (binaryString: string) => (
+  Number.parseInt(binaryString, 2)
+);
+
+
+/**
  * Parse decimal from *string*.
  */
 export const toFloat = (string: string) => (

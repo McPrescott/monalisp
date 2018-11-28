@@ -5,5 +5,8 @@ export const Regex = {
   Lower: /[a-z]/,
   Upper: /[A-Z]/,
   AlphaNum: /\w/,
-  Digit: /\d/
+  Digit: /\d/,
+  Hex: /[0-9a-f]/i,
+  Octal: /[0-8]/,
+  Binary: /[01]/
 };

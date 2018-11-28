@@ -92,7 +92,7 @@ export class Parser<T=any> {
   /**
    * Return wrapping `Parser` that maps *fn* over successfully parsed value.
    */
-  map<T, R>(fn: Unary<T, R>): Parser<R> {
+  map<R>(fn: (parsed: T) => R): Parser<R> {
     return Parser.of((stream) => {
       const result = run(this, stream);
       return (is(ParseFailure, result)) ? result : fn(result);
