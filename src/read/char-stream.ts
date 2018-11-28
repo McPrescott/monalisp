@@ -1,39 +1,81 @@
+// -----------------------------------------------------------------------------
+// -- CHARACTER STREAM
+//------------------------------------------------------------------------------
+
+
 import {NL, NULL} from "./common/chars";
 
 
-export type State = {
-  pos: number;
-  line: number;
-  col: number;
+export namespace CharStream {
+  export type State = {
+    pos: number;
+    line: number;
+    column: number;
+  }
+  export type Info = {
+    lineText: string;
+    line: number;
+    column: number;
+  }
 }
 
 
+
 export class CharStream {
-  private stateStack: State[] = [];
+
+  /**
+   * Static constructor of `CharStream`.
+   */
+  static of(source: string) {
+    return new CharStream(source);
+  }
+
+  private stateStack: CharStream.State[] = [];
   private pos: number = 0;
   private line: number = 0;
-  private col: number = 0;
+  private column: number = 0;
   constructor(private source: string) {}
 
   /**
    * Length of underlying string.
    */
-  get length() {
+  get length(): number {
     return this.source.length;
   }
 
   /**
    * Current state.
    */
-  get state(): State {
-    const {pos, line, col} = this;
-    return {pos, line, col};
+  get state(): CharStream.State {
+    const {pos, line, column} = this;
+    return {pos, line, column};
+  }
+
+  /**
+   * Current line of *source* input.
+   */
+  get currentLine(): string {
+    const {pos, column, source} = this;
+    const lineStart = pos - column;
+    let lineEnd = source.indexOf(NL, pos);
+    (lineEnd === -1) && (lineEnd = undefined);
+    const lineText = source.slice(lineStart, lineEnd);
+    return lineText;
+  }
+
+  /**
+   * Information about *this* `CharStream` at its current state.
+   */
+  get info(): CharStream.Info {
+    const {line, column} = this;
+    const lineText = this.currentLine;
+    return {lineText, line, column};
   }
 
   /**
    * Remaining portion of source string.
    */
-  get rest() {
+  get rest(): string {
     return this.source.slice(this.pos);
   }
 
@@ -46,7 +88,7 @@ export class CharStream {
     const char = this.source[this.pos++];
     if (char === NL) {
       this.line++;
-      this.col = 0;
+      this.column = 0;
     }
     return char;
   }
@@ -70,7 +112,7 @@ export class CharStream {
     const char = this.source[this.pos];
     if (char === NL) {
       this.line++;
-      this.col = 0;
+      this.column = 0;
     }
     this.pos++;
   }
@@ -89,6 +131,13 @@ export class CharStream {
     const state = this.stateStack.pop();
     this.pos = state.pos;
     this.line = state.line;
-    this.col = state.col;
+    this.column = state.column;
+  }
+
+  /**
+   * Remove most recently saved state without updating internal state.
+   */
+  unsave() {
+    this.stateStack.pop();
   }
 }

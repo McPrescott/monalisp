@@ -3,39 +3,23 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from './~functional';
-import {Binary, log} from './util';
-import {OPEN_PAREN, CLOSE_PAREN} from './read/common/chars';
-import {charRange, toInt} from './read/string-util';
+import {log} from './util';
+import {isLetter} from './read/common/predicates';
+import {join} from './read/common/transformers';
 import {CharStream} from './read/char-stream';
-import {Parser, parMap, run} from './read/parser';
-import {andThen, anyOf, opt, oneOrMore, pchar, pBetween} from './read/combinators';
+import {parMap} from './read/parser';
+import {parseChar, satisfy} from './read/parsers/string';
+import {star, plus} from './read/parsers/combinators';
+
+const parseLetter = satisfy(isLetter, 'letter');
+const parseLetters = parMap(join, plus(parseLetter, 'letters'));
+
+const source = 'zbc';
+const stream = CharStream.of(source);
+const parser = parseLetters;
+const result = parser.run(stream);
+const remaining = stream.rest;
 
 
-const liftTwo = curry((fn: Binary, x: Parser, y: Parser) => (
-  Parser.return(fn).apply(x).apply(y)
-));
-
-
-// Parser int string to number value
-const pDigit = anyOf(charRange('0', '9'));
-const optIntSign = opt(pchar('-'));
-const anyInt = andThen([optIntSign, oneOrMore(pDigit)]);
-const pInt = parMap(toInt, anyInt);
-
-// Parser addition
-const add = curry((x: number, y: number) => x + y);
-const addP = liftTwo(add)
-
-// Parser between parenthesis
-const pOpenParen = pchar(OPEN_PAREN);
-const pCloseParen = pchar(CLOSE_PAREN);
-const pLowerWord = oneOrMore(anyOf(charRange('a', 'z')));
-
-const source = '(hello)';
-const stream = new CharStream(source);
-const parser = pBetween(pOpenParen, pLowerWord, pCloseParen);
-const result = run(parser, stream);
-
-log('! Parsed:', result);
-log('! Remain:', stream.rest);
+log('! Result:', result);
+log('! Remain:', remaining);

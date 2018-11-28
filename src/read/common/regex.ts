@@ -1,4 +1,4 @@
-export const Rgx = {
+export const Regex = {
   Space: /\s/,
   NonSpace: /\S/,
   Alpha: /[A-Z]/i,

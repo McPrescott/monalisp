@@ -6,42 +6,63 @@
 // TODO: 
 //   + Result -> ParseResult?
 //   + ParseFn -> ParseFunction | ParseProcedure | ParseMethod??
-//   + parLabel
+//   + parLabel: should ParseFailure.info be added??
 //   + Write simple ramda functions?
 
 
-import {is, not} from 'ramda';
-import {curry, pipe} from '../~functional';
+import {is} from 'ramda';
+import {curry} from '../~functional';
 import {Failure} from '../base';
-import {Unary, UnaryPred} from '../util';
+import {Unary} from '../util';
 import {CharStream} from './char-stream';
+import {SPACE} from './common/chars';
 
 
 
 /**
  * Parse function signature of `Parser`.
  */
-export type ParseFn = (stream: CharStream) => Result;
+export type ParseFn<T=any> = (stream: CharStream) => Result<T>;
 
 
 /**
  * Result of `ParseFn`.
  */
-export type Result = any | ParseFailure;
+export type Result<T=any> = T | ParseFailure;
 
 
 
 /**
  * Parsing failure type.
  */
-export class ParseFailure extends Failure{
+export class ParseFailure extends Failure {
 
-  static of(message: string) {
-    return new ParseFailure(message);
+  /**
+   * Static constructor of `ParseFailure`.
+   */
+  static of(message: string, label?: string, info?: CharStream.Info) {
+    return new ParseFailure(message, label, info);
   }
 
-  constructor(public message: string) {
+  constructor(
+    public message: string,
+    public label="Unknown",
+    public info?: CharStream.Info
+  ){
     super();
+  }
+
+  /**
+   * Return error message for parse failure.
+   */
+  toString() {
+    const {message, label, info: {lineText, line, column}} = this;
+    return (
+      `Failed to parse ${label}.\n`
+    + `line: ${line}, column ${column}\n`
+    + `  ${lineText}\n`
+    + `  ${SPACE.repeat(column)}^ ${message}`
+    );
   }
 }
 
@@ -50,28 +71,28 @@ export class ParseFailure extends Failure{
 /**
  * Type wrapper around a parser function.
  */
-export class Parser {
+export class Parser<T=any> {
   
   /**
    * Return `Parser` that ignores given *stream* and returns given *value*.
    */
-  static return(value: any) {
-    return Parser.of((stream) => value );
+  static return<T>(value: T): Parser<T> {
+    return Parser.of((stream) => value);
   }
 
   /**
    * Static constructor function.
    */
-  static of(run: ParseFn, label?: string): Parser {
+  static of<T>(run: ParseFn<T>, label?: string): Parser<T> {
     return new Parser(run, label);
   }
 
-  constructor(public run: ParseFn, public label?: string) {};
+  constructor(public run: ParseFn<T>, public label?: string) {};
 
   /**
    * Return wrapping `Parser` that maps *fn* over successfully parsed value.
    */
-  map(fn: Unary): Parser {
+  map<T, R>(fn: Unary<T, R>): Parser<R> {
     return Parser.of((stream) => {
       const result = run(this, stream);
       return (is(ParseFailure, result)) ? result : fn(result);
@@ -97,19 +118,24 @@ export class Parser {
 
 
 
+
 // -- PARSER CONVENIENCE FUNCTIONS ---------------------------------------------
 
 
 /**
  * Test if given argument extends `ParseFailure`.
  */
-export const didParseFail: UnaryPred<Result> = is(ParseFailure);
+export const didParseFail = <T>(result: Result<T>): result is ParseFailure => (
+  result instanceof ParseFailure
+);
 
 
 /**
  * Test if given argument does not extend `ParseFailure`.
  */
-export const didParseSucceed: UnaryPred<Result> = pipe(didParseFail, not);
+export const didParseSucceed = <T>(result: Result<T>): result is T => (
+  !(result instanceof ParseFailure)
+)
 
 
 /**
@@ -131,7 +157,7 @@ export const parMap = curry((fn: Unary, parser: Parser) => (
 /**
  * Apply *arg* to contained function of *parser*.
  */
-export const parApply = curry((arg, parser: Parser) => (
+export const parApply = curry((arg: Parser, parser: Parser) => (
   parser.apply(arg)
 ));
 
@@ -149,7 +175,25 @@ export const parBind = curry((fn: (p: any) => Parser, parser: Parser) => (
 ));
 
 
+/**
+ * Return new `Parser` with given *label*.
+ */
+export const parLabel = curry((label: string, parser: Parser) => (
+  Parser.of((stream) => {
+    let result = run(parser, stream);
+    if (didParseFail(result))
+      result.label = label;
+    return result;
+  }, label)
+));
 
-export const parLabel = curry((label: string, parser: Parser) => {
 
-});
+
+export const labelledParser = <T>(fn: ParseFn<T>, label: string) => (
+  Parser.of((stream) => {
+    let result = fn(stream);
+    if (didParseFail(result))
+      result.label = label;
+    return result;
+  }, label)
+);

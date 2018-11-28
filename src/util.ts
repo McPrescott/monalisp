@@ -1,5 +1,6 @@
 import {curry, is, not} from 'ramda';
 import {Failure} from './base';
+import {ParseFailure} from './read/parser';
 
 
 // -- Function Types -----------------------------------------------------------
@@ -62,6 +63,9 @@ export const log = (...args) => {
       return (arg.startsWith('! '))
         ? arg.slice(2)
         : quote(arg);
+    }
+    else if (arg instanceof ParseFailure) {
+      return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`
     }
     return arg;
   });

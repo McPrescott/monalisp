@@ -86,3 +86,9 @@ export const toInt = (string: string, base?: number) => (
 export const toFloat = (string: string) => (
   Number.parseFloat
 );
+
+
+/**
+ * Return string representation of given *object*.
+ */
+export const toString = (object) => object.toString();
