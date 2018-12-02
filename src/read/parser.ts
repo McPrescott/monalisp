@@ -10,7 +10,6 @@
 //   + Write simple ramda functions?
 
 
-import {is} from 'ramda';
 import {curry} from '../~functional';
 import {Failure} from '../base';
 import {Unary} from '../util';
@@ -95,7 +94,7 @@ export class Parser<T=any> {
   map<R>(fn: (parsed: T) => R): Parser<R> {
     return Parser.of((stream) => {
       const result = run(this, stream);
-      return (is(ParseFailure, result)) ? result : fn(result);
+      return (didParseFail(result)) ? result : fn(result);
     });
   }
 
@@ -103,17 +102,18 @@ export class Parser<T=any> {
    * Return `Parser` that applies the successful result of *parser* to the
    * successful result of *this*.
    */
-  apply(parser: Parser): Parser {
-    return Parser.of((stream) => {
-      const thisResult = run(this, stream);
-      if (is(ParseFailure, thisResult))
-        return thisResult;
-      const parserResult = run(parser, stream);
-      return (is(ParseFailure, parserResult)
-        ? parserResult 
-        : thisResult(parserResult));
-    });
-  }
+  // apply<A>(parser: Parser<A>): Parser {
+  //   return Parser.of((stream) => {
+  //     const thisResult = run(this, stream);
+  //     if (didParseFail(thisResult))
+  //       return thisResult;
+  //     const parserResult = run(parser, stream);
+  //     return (didParseFail(parserResult)
+  //       ? parserResult
+  //       //@ts-ignore
+  //       : thisResult(parserResult));
+  //   });
+  // }
 }
 
 
@@ -135,50 +135,98 @@ export const didParseFail = <T>(result: Result<T>): result is ParseFailure => (
  */
 export const didParseSucceed = <T>(result: Result<T>): result is T => (
   !(result instanceof ParseFailure)
-)
+);
 
 
 /**
  * Run *parser* with given *stream*.
  */
-export const run = curry((parser: Parser, stream: CharStream) => 
-  parser.run(stream)
+export const run: Run = (
+  curry((parser: Parser, stream: CharStream) => 
+    parser.run(stream)
+  )
 );
+
+interface Run {
+  <T>(parser: Parser<T>): (stream: CharStream) => Result<T>;
+  <T>(parser: Parser<T>, stream: CharStream): Result<T>;
+}
+
+
+/**
+ * Return `Parser` that always returns *returnValue*.
+ */
+export const preturn = <T>(returnValue: T) => Parser.return(returnValue);
 
 
 /**
  * Map *fn* over given *parser*.
+ * 
+ * `pmap :: (A -> B) -> Parser<A> -> Parser<B>`
  */
-export const parMap = curry((fn: Unary, parser: Parser) => (
+export const pmap: PMap = curry((fn: Unary, parser: Parser) => (
   parser.map(fn)
 ));
 
+interface PMap {
+  <A, B>(fn: (x: A) => B, parser: Parser<A>): Parser<B>;
+  <A, B>(fn: (x: A) => B): (parser: Parser<A>) => Parser<B>;
+}
+
+
 
 /**
- * Apply *arg* to contained function of *parser*.
+ * Apply *parsed* to the resulting function of *parser*.
+ * 
+ * `papply :: Parser<a -> b> -> Parser<a> -> Parser<b>`
  */
-export const parApply = curry((arg: Parser, parser: Parser) => (
-  parser.apply(arg)
-));
+export const papply: PApply = curry(
+  <A, B>(parser: Parser<(parsed: A) => B>, parsed: Parser<A>) => (
+    Parser.of((stream) => {
+      const parserResult = run(parser, stream);
+      if (didParseFail(parserResult))
+        return parserResult;
+      const parsedResult = run(parsed, stream);
+      return (didParseFail(parsedResult))
+        ? parsedResult
+        : parserResult(parsedResult);
+    })
+  )
+);
+
+interface PApply {
+  <A, B>(parser: Parser<(parsed: A) => B>, parsed: Parser<A>): Parser<B>;
+  <A, B>(parser: Parser<(parsed: A) => B>): (parsed: Parser<A>) => Parser<B>;
+}
+
 
 
 /**
- * Bind of `Parser` monad.
+ * Apply the result of *parser* to *producer*, returning a new `Parser`.
+ * 
+ * `pbind :: (A -> Parser<B>) -> Parser<A> -> Parser<B>`
  */
-export const parBind = curry((fn: (p: any) => Parser, parser: Parser) => (
-  Parser.of((stream) => {
-    let parserResult = run(parser, stream);
-    if (didParseFail(parserResult))
-      return parserResult;
-    return run(fn(parserResult), stream);
-  })
-));
+export const pbind: ParserBind = (
+  curry((fn: (p: any) => Parser, parser: Parser) => (
+    Parser.of((stream) => {
+      let parserResult = run(parser, stream);
+      if (didParseFail(parserResult))
+        return parserResult;
+      return run(fn(parserResult), stream);
+    })
+  ))
+);
+
+interface ParserBind {
+  <A, B>(producer: (parsed: A) => Parser<B>, parser: Parser<A>): Parser<B>;
+  <A, B>(producer: (parsed: A) => Parser<B>): (parser: Parser<A>) => Parser<B>;
+}
 
 
 /**
  * Return new `Parser` with given *label*.
  */
-export const parLabel = curry((label: string, parser: Parser) => (
+export const plabel: PLabel = curry((label: string, parser: Parser) => (
   Parser.of((stream) => {
     let result = run(parser, stream);
     if (didParseFail(result))
@@ -187,6 +235,10 @@ export const parLabel = curry((label: string, parser: Parser) => (
   }, label)
 ));
 
+interface PLabel {
+  <T>(label: string, parser: Parser<T>): Parser<T>;
+  <T>(label: string): (parser: Parser<T>) => Parser<T>;
+}
 
 
 export const labelledParser = <T>(fn: ParseFn<T>, label: string) => (
