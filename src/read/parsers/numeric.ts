@@ -7,14 +7,14 @@ import {pipe} from '../../~functional';
 import {MINUS, DOT} from '../common/chars';
 import {isDigit, matches} from '../common/predicates';
 import {toInt, join, toFloat, hexStringToNumber, octalStringToNumber, binaryStringToNumber} from '../common/transformers';
-import {satisfy, parseChar} from './string';
-import {plus, sequence, optional} from './combinators';
+import {satisfy, pchar} from './string';
+import {plus, seq, opt} from './combinators';
 import {Regex} from '../common/regex';
 
 
-const parseMinus = parseChar(MINUS);
+const parseMinus = pchar(MINUS);
 
-const parseDot = parseChar(DOT);
+const parseDot = pchar(DOT);
 
 const joinToInt = pipe(join, toInt);
 
@@ -59,8 +59,8 @@ export const parseBinaryDigits = (
  * `Parser` for an integer of base ten, returns a number.
  */
 export const parseInt = (
-  sequence([
-    optional(parseMinus), 
+  seq([
+    opt(parseMinus), 
     parseDigits
   ], 'integer').map(joinToInt)
 );
@@ -70,10 +70,10 @@ export const parseInt = (
  * `Parser` for float, with optional sign and decimal places.
  */
 export const parseFloat = (
-  sequence([
-    optional(parseMinus),
+  seq([
+    opt(parseMinus),
     parseDigits,
-    optional(sequence([
+    opt(seq([
       parseDot,
       parseDigits
     ])).map(join)
@@ -85,8 +85,8 @@ export const parseFloat = (
  * `Parser` for hexadecimal number with optional sign.
  */
 export const parseHex = (
-  sequence([
-    optional(parseMinus),
+  seq([
+    opt(parseMinus),
     parseHexDigits
   ], 'hexadecimal number').map(pipe(join, hexStringToNumber))
 );
@@ -96,8 +96,8 @@ export const parseHex = (
  * `Parser` for octal number with optional sign.
  */
 export const parseOctal = (
-  sequence([
-    optional(parseMinus),
+  seq([
+    opt(parseMinus),
     parseOctalDigits
   ], 'octal number').map(pipe(join, octalStringToNumber))
 );
@@ -107,8 +107,8 @@ export const parseOctal = (
  * `Parser` for binary number with optional sign.
  */
 export const parseBinary = (
-  sequence([
-    optional(parseMinus),
+  seq([
+    opt(parseMinus),
     parseBinaryDigits
   ], 'binary number').map(pipe(join, binaryStringToNumber))
 );

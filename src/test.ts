@@ -8,7 +8,7 @@ import {isLetter} from './read/common/predicates';
 import {join} from './read/common/transformers';
 import {CharStream} from './read/char-stream';
 import {pmap} from './read/parser';
-import {parseChar, satisfy} from './read/parsers/string';
+import {pchar, satisfy} from './read/parsers/string';
 import {star, plus} from './read/parsers/combinators';
 import {parseInt, parseHex, parseBinary} from './read/parsers/numeric';
 

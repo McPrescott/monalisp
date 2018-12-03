@@ -3,14 +3,14 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed} from "../parser";
+import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success} from "../parser";
 
 
 /**
  * Return `Parser` that sequentially executes *parsers*, returning a list of the
  * results.
  */
-export const sequence = (
+export const seq = (
   <T>(parsers: Parser<T>[], label?: string): Parser<T[]> => (
     labelledParser((stream) => {
       const parsed = [];
@@ -28,12 +28,13 @@ export const sequence = (
 
 
 /**
- * Return `Parser` that runs provided *parser*, but returns `null` upon success.
+ * Return `Parser` that runs provided *parser*, but returns placeholder
+ * `ParseSuccess` upon success.
  */
 export const skip = <T>(parser: Parser<T>, label?: string) => (
   labelledParser((stream) => {
     const result = parser.run(stream);
-    return (didParseFail(result)) ? result : null;
+    return (didParseFail(result)) ? result : success;
   }, (label || `Skip ${parser.label}`))
 );
 
@@ -43,7 +44,7 @@ export const skip = <T>(parser: Parser<T>, label?: string) => (
  * possible. The returned `Parser` can never fail, if the first parsing attempt
  * fails the empty list is returned.
  */
-export const star = <T>(parser: Parser<T>, label?: string) => (
+export const star = <T>(parser: Parser<T>, label?: string): Parser<T[]> => (
   labelledParser((stream) => {
     const results = [];
     let currentResult: Result<T>;
@@ -77,7 +78,7 @@ export const plus = <T>(parser: Parser<T>, label?: string) => (
  * Returns `Parser` that runs given *parser* once. When parse is successful the
  * result is returned, otherwise `null` is returned.
  */
-export const optional = <T>(parser: Parser<T>, label?: string) => (
+export const opt = <T>(parser: Parser<T>, label?: string) => (
   labelledParser((stream) => {
     const result = parser.run(stream);
     return (didParseSucceed(result)) ? result : null;
@@ -114,12 +115,3 @@ export const attempt = <T>(parser: Parser<T>, label?: string) => (
     return result;
   }, (label || `Attempt ${parser.label}`))
 );
-
-
-// + [x] sequence :: Parser<T>[] -> Parser<T[]>
-// + [x] skip :: Parser<T> -> Parser<void>
-// + [x] star :: Parser<T> -> Parser<T[]>
-// + [x] plus :: Parser<T> -> Parser<T[]>
-// + [x] optional :: Parser<T> -> Parser<T>
-// + [x] choice :: Parser<T>[] -> Parser<T>
-// + [x] attempt :: Parser<T> -> Parser<T>

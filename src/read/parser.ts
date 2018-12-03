@@ -3,13 +3,6 @@
 //------------------------------------------------------------------------------
 
 
-// TODO: 
-//   + Result -> ParseResult?
-//   + ParseFn -> ParseFunction | ParseProcedure | ParseMethod??
-//   + parLabel: should ParseFailure.info be added??
-//   + Write simple ramda functions?
-
-
 import {curry} from '../~functional';
 import {Failure} from '../base';
 import {Unary} from '../util';
@@ -29,6 +22,18 @@ export type ParseFn<T=any> = (stream: CharStream) => Result<T>;
  */
 export type Result<T=any> = T | ParseFailure;
 
+
+/**
+ * Parse success, typically used as a placeholder for parsers that throw away
+ * values.
+ */
+export class ParseSuccess {
+  toString() {
+    return '';
+  }
+}
+
+export const success = new ParseSuccess();
 
 
 /**
@@ -95,7 +100,7 @@ export class Parser<T=any> {
     return Parser.of((stream) => {
       const result = run(this, stream);
       return (didParseFail(result)) ? result : fn(result);
-    });
+    }, this.label);
   }
 
   /**
@@ -156,7 +161,9 @@ interface Run {
 /**
  * Return `Parser` that always returns *returnValue*.
  */
-export const preturn = <T>(returnValue: T) => Parser.return(returnValue);
+export const preturn = <T>(returnValue: T): Parser<T> => (
+  Parser.return(returnValue)
+);
 
 
 /**
@@ -206,7 +213,7 @@ interface PApply {
  * 
  * `pbind :: (A -> Parser<B>) -> Parser<A> -> Parser<B>`
  */
-export const pbind: ParserBind = (
+export const pbind: PBind = (
   curry((fn: (p: any) => Parser, parser: Parser) => (
     Parser.of((stream) => {
       let parserResult = run(parser, stream);
@@ -217,7 +224,7 @@ export const pbind: ParserBind = (
   ))
 );
 
-interface ParserBind {
+interface PBind {
   <A, B>(producer: (parsed: A) => Parser<B>, parser: Parser<A>): Parser<B>;
   <A, B>(producer: (parsed: A) => Parser<B>): (parser: Parser<A>) => Parser<B>;
 }

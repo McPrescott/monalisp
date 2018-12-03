@@ -1,3 +1,5 @@
+import { pmap, Parser } from "../parser";
+
 // -----------------------------------------------------------------------------
 // -- TRANSFORMERS
 //------------------------------------------------------------------------------
@@ -53,6 +55,14 @@ export const toString = (object) => object.toString();
 /**
  * Join list into a string.
  */
-export const join = <T>(ls: T[], seperator=""/*String.empty*/) => (
-  ls.join(seperator)
+export const join = <T>(ls: T[], sep=""/*String.empty*/) => (
+  ls.join(sep)
+);
+
+
+/**
+ * Join list contained in *parser* into a string.
+ */
+export const pjoin = (parser: Parser<any[]>, sep="") => (
+  pmap((parsed) => parsed.join(sep), parser)
 );
