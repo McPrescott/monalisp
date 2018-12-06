@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap} from "../parser";
+import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run} from "../parser";
 
 
 /**
@@ -104,6 +104,79 @@ export const choice = <T>(parsers: Parser<T>[], label?: string) => (
 
 
 /**
+ * Return `Parser` that runs both *before* and *after* respectively, returning
+ * only the result of *after* upon success.
+ */
+export const after = <T>(before: Parser, after: Parser<T>) => (
+  Parser.of((stream) => {
+    const beforeResult = run(before, stream);
+    if (didParseFail(beforeResult))
+      return beforeResult;
+    return run(after, stream);
+  })
+);
+
+
+/**
+ * Return `Parser` that runs both *before* and *after* respectively, returning
+ * only the result of *before* upon success.
+ */
+export const before = <T>(before: Parser<T>, after: Parser) => (
+  Parser.of((stream) => {
+    const result = run(before, stream);
+    if (didParseFail(result))
+      return result;
+    const afterResult = run(after, stream);
+    if (didParseFail(afterResult))
+      return afterResult;
+    return result;
+  })
+);
+
+
+/**
+ * Return `Parser` that runs each of the *pre*, *mid*, *post* `Parser`s
+ * provided, returning only the result of *mid* on success.
+ */
+export const between = (
+  <T>(pre: Parser, mid: Parser<T>, post: Parser): Parser<T> => (
+    Parser.of((stream) => {
+      const preResult = run(pre, stream);
+      if (didParseFail(preResult))
+        return preResult;
+      const result = run(mid, stream);
+      if (didParseFail(result))
+        return result;
+      const postResult = run(post, stream);
+      if (didParseFail(postResult))
+        return postResult
+      return result;
+    })
+  )
+);
+
+
+/**
+ * Return `Parser` that parses a series elements resulting from given *element*
+ * `Parser`, separated optionally by *separator*. If *separator* is defined the
+ * results are not included in the resulting list. This parser never fails; if
+ * failure occurs on the first parsing attempt, the empty list is returned.
+ */
+export const series = <T>(element: Parser<T>, separator?: Parser) => (
+  Parser.of((stream) => {
+    const elements = [];
+    let result: Result<T> = run(element, stream);
+    while (didParseSucceed(result)) {
+      elements.push(result);
+      (separator && run(separator, stream));
+      result = run(element, stream);
+    }
+    return elements;
+  })
+);
+
+
+/**
  * Return `Parser` that run given *parser* normally, except that upon failure
  * the position of the `CharStream` is reset.
  */
@@ -126,7 +199,7 @@ export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
 
 
 /**
- * 
+ * Maps the successfully parsed value of *parser* to *value*.
  */
 export const pmapTo = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
   pmap((_) => value, parser)
