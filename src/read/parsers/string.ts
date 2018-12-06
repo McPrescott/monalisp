@@ -5,9 +5,9 @@
 
 import {map} from '../../~functional/map';
 import {isChar, isWhitespace} from "../common/predicates";
-import {join, pjoin} from '../common/transformers';
+import {join} from '../common/transformers';
 import {ParseFailure, Parser, Result, pmap} from "../parser";
-import {seq, star, plus, skip} from './combinators';
+import {seq, star, plus, skip, pjoin} from './combinators';
 
 
 /**

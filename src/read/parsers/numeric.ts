@@ -8,7 +8,7 @@ import {MINUS, DOT} from '../common/chars';
 import {isDigit, matches} from '../common/predicates';
 import {toInt, join, toFloat, hexStringToNumber, octalStringToNumber, binaryStringToNumber} from '../common/transformers';
 import {satisfy, pchar} from './string';
-import {plus, seq, opt} from './combinators';
+import {plus, seq, opt, pjoin} from './combinators';
 import {Regex} from '../common/regex';
 
 
@@ -73,10 +73,10 @@ export const parseFloat = (
   seq([
     opt(parseMinus),
     parseDigits,
-    opt(seq([
+    opt(pjoin(seq([
       parseDot,
       parseDigits
-    ])).map(join)
+    ])))
   ], 'float').map(joinToFloat)
 );
 

@@ -107,18 +107,18 @@ export class Parser<T=any> {
    * Return `Parser` that applies the successful result of *parser* to the
    * successful result of *this*.
    */
-  // apply<A>(parser: Parser<A>): Parser {
-  //   return Parser.of((stream) => {
-  //     const thisResult = run(this, stream);
-  //     if (didParseFail(thisResult))
-  //       return thisResult;
-  //     const parserResult = run(parser, stream);
-  //     return (didParseFail(parserResult)
-  //       ? parserResult
-  //       //@ts-ignore
-  //       : thisResult(parserResult));
-  //   });
-  // }
+  apply<A>(parser: Parser<A>): Parser<T extends (a: A) => infer B ? B : null> {
+    return Parser.of((stream) => {
+      const thisResult = run(this, stream);
+      if (didParseFail(thisResult))
+        return thisResult;
+      const parserResult = run(parser, stream);
+      return (didParseFail(parserResult)
+        ? parserResult
+        // @ts-ignore
+        : thisResult(parserResult));
+    });
+  }
 }
 
 

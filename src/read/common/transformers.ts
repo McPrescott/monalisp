@@ -41,8 +41,8 @@ export const binaryStringToNumber = (binaryString: string) => (
 /**
  * Parse decimal from *string*.
  */
-export const toFloat = (string: string) => (
-  Number.parseFloat
+export const toFloat = (number: string) => (
+  Number.parseFloat(number)
 );
 
 
@@ -55,14 +55,6 @@ export const toString = (object) => object.toString();
 /**
  * Join list into a string.
  */
-export const join = <T>(ls: T[], sep=""/*String.empty*/) => (
+export const join = <T>(ls: T[], sep="") => (
   ls.join(sep)
-);
-
-
-/**
- * Join list contained in *parser* into a string.
- */
-export const pjoin = (parser: Parser<any[]>, sep="") => (
-  pmap((parsed) => parsed.join(sep), parser)
 );

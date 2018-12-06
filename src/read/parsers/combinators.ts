@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success} from "../parser";
+import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap} from "../parser";
 
 
 /**
@@ -76,12 +76,12 @@ export const plus = <T>(parser: Parser<T>, label?: string) => (
 
 /**
  * Returns `Parser` that runs given *parser* once. When parse is successful the
- * result is returned, otherwise `null` is returned.
+ * result is returned, otherwise `ParseSuccess` is returned.
  */
 export const opt = <T>(parser: Parser<T>, label?: string) => (
   labelledParser((stream) => {
     const result = parser.run(stream);
-    return (didParseSucceed(result)) ? result : null;
+    return (didParseSucceed(result)) ? result : success;
   }, (label || `Optional ${parser.label}`))
 );
 
@@ -114,4 +114,20 @@ export const attempt = <T>(parser: Parser<T>, label?: string) => (
     (didParseFail(result)) ? stream.restore() : stream.unsave();
     return result;
   }, (label || `Attempt ${parser.label}`))
+);
+
+
+/**
+ * Join list contained in *parser* into a string.
+ */
+export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
+  pmap((parsed) => parsed.join(sep), parser)
+);
+
+
+/**
+ * 
+ */
+export const pmapTo = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
+  pmap((_) => value, parser)
 );

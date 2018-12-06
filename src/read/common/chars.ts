@@ -34,3 +34,4 @@ export const AMPERSAND = '&';
 export const ASTERISK = '*';
 export const UNDERSCORE = '_';
 export const TILDE = '~';
+export const EMPTY = '';

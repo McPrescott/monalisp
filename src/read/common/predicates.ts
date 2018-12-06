@@ -7,12 +7,18 @@ import {curry} from '../../~functional';
 import {Regex} from './regex';
 
 
+export const invert = <T extends any[]>(predicate: (...args: T) => boolean) => (
+  (...args: T) => !predicate(...args)
+);
+
+
 /**
  * Check if provided characters are the same.
  */
 export const isChar = curry((first: string, second: string) => (
   first === second
 ));
+
 
 /**
  * Match *string* against *regex*.

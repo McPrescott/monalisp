@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {NL, NULL} from "./common/chars";
+import {NL, NULL, EMPTY} from "./common/chars";
 
 
 export namespace CharStream {
@@ -84,7 +84,7 @@ export class CharStream {
    */
   next() {
     if (this.pos >= this.length)
-      return NULL;
+      return EMPTY;
     const char = this.source[this.pos++];
     if (char === NL) {
       this.line++;
@@ -98,7 +98,7 @@ export class CharStream {
    */
   peek() {
     if (this.pos >= this.length)
-      return '';
+      return EMPTY;
     return this.source[this.pos];
   }
 
