@@ -6,6 +6,7 @@
 import {curry, is, not} from 'ramda';
 import {Failure} from './base';
 import {ParseFailure} from './read/parser';
+import {Sym} from './read/reader';
 
 
 
@@ -63,17 +64,28 @@ export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
 export const quote = (str: string) => `"${str}"`;
 
 
+const mapArgs = (arg) => {
+  if (Array.isArray(arg)) {
+    return `(${arg.map(mapArgs).join(' ')})`;
+  }
+  else if (typeof arg === 'string') {
+    return (arg.startsWith('! '))
+      ? arg.slice(2)
+      : quote(arg);
+  }
+  else if (arg instanceof ParseFailure) {
+    return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`
+  }
+  else if (arg instanceof Sym.Symbol) {
+    return `$(${arg.identifier})`;
+  }
+  else if (arg === null) {
+    return 'nil'
+  }
+  return arg;
+}
+
 export const log = (...args) => {
-  let transformed = args.map((arg) => {
-    if (typeof arg === 'string') {
-      return (arg.startsWith('! '))
-        ? arg.slice(2)
-        : quote(arg);
-    }
-    else if (arg instanceof ParseFailure) {
-      return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`
-    }
-    return arg;
-  });
+  let transformed = args.map(mapArgs);
   console.log(...transformed);
 };

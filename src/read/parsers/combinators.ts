@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run} from "../parser";
+import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from "../parser";
 
 
 /**
@@ -158,21 +158,72 @@ export const between = (
 
 /**
  * Return `Parser` that parses a series elements resulting from given *element*
- * `Parser`, separated optionally by *separator*. If *separator* is defined the
- * results are not included in the resulting list. This parser never fails; if
+ * `Parser`, separated by *separator*. This parser never fails; if
  * failure occurs on the first parsing attempt, the empty list is returned.
  */
-export const series = <T>(element: Parser<T>, separator?: Parser) => (
+export const series = <T>(element: Parser<T>, separator: Parser) => (
   Parser.of((stream) => {
     const elements = [];
+    const sepElement = after(separator, element);
     let result: Result<T> = run(element, stream);
     while (didParseSucceed(result)) {
       elements.push(result);
-      (separator && run(separator, stream));
-      result = run(element, stream);
+      result = run(sepElement, stream);
     }
     return elements;
   })
+);
+
+
+/**
+ * Return `Parser` that parses a series of *element*s separated by *separator*.
+ * If the amount of elements parsed is less than *min* (defaults to 1), the
+ * parse fails.
+ */
+export const minSeries = (
+  <T>(element: Parser<T>, separator: Parser, min=1) => (
+    Parser.of((stream) => {
+      const elements = [];
+      const sepElement = after(separator, element);
+      let result: Result<T> = run(element, stream);
+      while (didParseSucceed(result)) {
+        elements.push(result);
+        result = run(sepElement, stream);
+      }
+      if (elements.length < min)
+        return result;  
+      return elements;
+    })
+  )
+);
+
+
+/**
+ * Return `Parser` that parses a series of *element*s separated by *separator*.
+ * If the amount of elements parsed is more than *max* (defaults to Infinity),
+ * the parse fails.
+ */
+export const maxSeries = (
+  <T>(element: Parser<T>, separator: Parser, max=Infinity) => (
+    Parser.of((stream) => {
+      const elements = [];
+      const sepElement = after(separator, element);
+      let result: Result<T> = run(element, stream);
+      while (didParseSucceed(result)) {
+        if (elements.push(result) > max)
+          break;
+        result = run(sepElement, stream);
+      }
+      if (elements.length > max) {
+        return ParseFailure.of(
+          `Expected less than ${max} elements.`,
+          `series of ${max} ${element.label}`,
+          stream.info
+        );
+      }
+      return elements;
+    })
+  )
 );
 
 
@@ -199,8 +250,36 @@ export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
 
 
 /**
- * Maps the successfully parsed value of *parser* to *value*.
+ * Replaces the successfully parsed value of *parser* with *value*.
  */
-export const pmapTo = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
+export const setParsed = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
   pmap((_) => value, parser)
 );
+
+
+/**
+ * Create forward referencable `Parser`. Before using the wrapper, the property
+ * `parser` of the returned `ParserReference` should be replaced with the actual
+ * `Parser`.
+ */
+export const fref = <T=any>(): ParserReferencePair<T> => {
+  const ref: ParserReference<T> = {
+    //@ts-ignore
+    parser: <Parser<T>> Parser.of((stream) => (
+      ParseFailure.of(
+        `Forward reference has not been replaced.`,
+        'unknown',
+        stream.info
+      )
+    ))
+  };
+
+  const wrapper = Parser.of((stream) => ref.parser.run(stream));
+  return [ref, wrapper];
+}
+
+export type ParserReferencePair<T=any> = [ParserReference<T>, Parser<T>];
+
+export interface ParserReference<T=any> {
+  parser: Parser<T>;
+};

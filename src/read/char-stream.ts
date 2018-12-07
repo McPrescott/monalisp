@@ -90,6 +90,9 @@ export class CharStream {
       this.line++;
       this.column = 0;
     }
+    else {
+      this.column++;
+    }
     return char;
   }
 
@@ -113,6 +116,9 @@ export class CharStream {
     if (char === NL) {
       this.line++;
       this.column = 0;
+    }
+    else {
+      this.column++
     }
     this.pos++;
   }

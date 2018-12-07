@@ -3,12 +3,12 @@
 //------------------------------------------------------------------------------
 
 
-import {DBL_QUT} from './common/chars';
+import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN} from './common/chars';
 import {matches, isChar, invert} from './common/predicates';
 import {CharStream} from './char-stream';
-import {run, pmap} from './parser';
-import {pjoin, seq, star, skip, choice, pmapTo, attempt} from './parsers/combinators';
-import {satisfy, pchar, pstring} from './parsers/string';
+import {run, pmap, plabel} from './parser';
+import {pjoin, seq, star, skip, choice, between, series, fref} from './parsers/combinators';
+import {satisfy, pchar, anySpace, someSpace} from './parsers/string';
 import {parseFloat} from './parsers/numeric';
 import {log} from '../util';
 
@@ -16,34 +16,19 @@ import {log} from '../util';
 /// be interpreted by the reader and be converted into their corresponding
 /// values before being sent for evaluation?
 
-// Nil
-// Bool
-// Sym 
-// Str
-// Num
+const literals = {
+  nil: null,
+  true: true,
+  false: false
+};
 
 
-namespace Nil {
-  export const parser = attempt(pmapTo(pstring('nil'), null));
-}
-
-
-namespace Bool {
-  const ptrue = pmapTo(pstring('true'), true);
-  const pfalse = pmapTo(pstring('false'), false);
-  export const parser = choice([
-    attempt(ptrue),
-    attempt(pfalse)
-  ], 'boolean');
-}
-
-
-namespace Num {
+export namespace Num {
   export const parser = parseFloat;
 }
 
 
-namespace Str {
+export namespace Str {
   const skipQuote = skip(pchar(DBL_QUT));
   const notQuote = satisfy(invert(isChar(DBL_QUT)));
 
@@ -57,18 +42,20 @@ namespace Str {
 }
 
 
-namespace Sym {
-  const begin = /[a-z+\-*/=@&|!?$_]/i;
-  const contain = /[a-z0-9+\-*/=@&|!?$_]/i;
+export namespace Sym {
+  const begin = /[a-z+\-*/=<>&|!?$_]/i;
+  const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
 
   const table: {[key: string]: Symbol} = {};
 
 
   const getSymbol = (identifier: string) => (
-    (identifier in table)
-      ? table[identifier]
-      : (table[identifier] = Symbol.of(identifier))
+    (identifier in literals)
+      ? literals[identifier]
+      : (identifier in table)
+        ? table[identifier]
+        : (table[identifier] = Symbol.of(identifier))
   );
 
 
@@ -84,7 +71,6 @@ namespace Sym {
     }
   }
 
-
   export const parser = pmap(getSymbol, pjoin(
     seq([
       satisfy(matches(begin)),
@@ -94,10 +80,8 @@ namespace Sym {
 }
 
 
-namespace Atom {
+export namespace Atom {
   export const parser = choice([
-    Nil.parser,
-    Bool.parser,
     Num.parser,
     Str.parser,
     Sym.parser
@@ -105,11 +89,33 @@ namespace Atom {
 }
 
 
-const source = 'falsz "a string" 100.12 with some remaining text';
+export namespace SExpr {
+  export const [ref, parser] = fref();
+}
+
+
+// for now, a list cannot contain other lists, only atoms.
+export namespace List {
+  const label = plabel('list');
+  const popen = seq([pchar(OPEN_PAREN), anySpace], 'open paren');
+  const pclose = seq([anySpace, pchar(CLOSE_PAREN)], 'close paren');
+  const contents = series(SExpr.parser, someSpace);
+  export const parser = label(between(popen, contents, pclose));
+}
+
+
+
+SExpr.ref.parser = choice([
+  Atom.parser,
+  List.parser
+], 's-expression');
+
+
+const source = '(true nil nilz false (100.12 99 lol)) with some remaining text';
 const stream = CharStream.of(source);
-const result = run(Atom.parser, stream);
+const result = run(List.parser, stream);
 const remaining = stream.rest;
 
 
-log('! Result:', result);
+log('! Result:', result); 
 log('! Remain:', remaining);
