@@ -1,8 +1,7 @@
-import { pmap, Parser } from "../parser";
-
 // -----------------------------------------------------------------------------
 // -- TRANSFORMERS
 //------------------------------------------------------------------------------
+
 
 /**
  * Parse integer from *string*, with optional *base*. If *base* is not
@@ -53,8 +52,28 @@ export const toString = (object) => object.toString();
 
 
 /**
+ * Create a new array from the provided *list*, flattening any nested arrays.
+ */
+export const flatten = (list: any[]) => {
+  let flat = [];
+  for (const elem of list) {
+    if (Array.isArray(elem))
+      flat.push(...flatten(elem));
+    else
+      flat.push(elem);
+  }
+  return flat;
+}
+
+
+/**
  * Join list into a string.
  */
 export const join = <T>(ls: T[], sep="") => (
   ls.join(sep)
+);
+
+
+export const joinFlat = (ls: any[], sep="") => (
+  flatten(ls).join(sep)
 );

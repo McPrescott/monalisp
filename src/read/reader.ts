@@ -3,14 +3,15 @@
 //------------------------------------------------------------------------------
 
 
-import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN} from './common/chars';
+import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from './common/chars';
 import {matches, isChar, invert} from './common/predicates';
 import {CharStream} from './char-stream';
 import {run, pmap, plabel} from './parser';
-import {pjoin, seq, star, skip, choice, between, series, fref} from './parsers/combinators';
-import {satisfy, pchar, anySpace, someSpace} from './parsers/string';
+import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat} from './parsers/combinators';
+import {satisfy, pchar, anySpace, someSpace, satisfyRegex} from './parsers/string';
 import {parseFloat} from './parsers/numeric';
 import {log} from '../util';
+
 
 /// `true`, `false`, `null`, etc. can be kept in a symbol table, or should these
 /// be interpreted by the reader and be converted into their corresponding
@@ -46,18 +47,7 @@ export namespace Sym {
   const begin = /[a-z+\-*/=<>&|!?$_]/i;
   const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
-
   const table: {[key: string]: Symbol} = {};
-
-
-  const getSymbol = (identifier: string) => (
-    (identifier in literals)
-      ? literals[identifier]
-      : (identifier in table)
-        ? table[identifier]
-        : (table[identifier] = Symbol.of(identifier))
-  );
-
 
   export class Symbol {
     static of(identifier: string) {
@@ -71,6 +61,14 @@ export namespace Sym {
     }
   }
 
+  const getSymbol = (identifier: string) => (
+    (identifier in literals)
+      ? literals[identifier]
+      : (identifier in table)
+        ? table[identifier]
+        : (table[identifier] = Symbol.of(identifier))
+  );
+
   export const parser = pmap(getSymbol, pjoin(
     seq([
       satisfy(matches(begin)),
@@ -80,11 +78,40 @@ export namespace Sym {
 }
 
 
+export namespace Keyword {
+  const label = plabel('keyword');
+  const pcolon = pchar(COLON);
+  const validChars = satisfyRegex(/[a-z0-9+\-*/=<>&|!?$_]/i);
+  const keyString = pjoinFlat(pair(pcolon, plus(validChars)));
+  
+  export class Keyword {
+    static of(key: string) {
+      return new Keyword(key);
+    }
+    public readonly uid: Symbol;
+    constructor(public readonly key: string) {
+      this.uid = Symbol(`Key ${key}`);
+    };
+  }
+
+  export const table: {[key: string]: Keyword} = {};
+
+  export const getKey = (key: string) => (
+    (key in table) 
+      ? table[key]
+      : (table[key] = Keyword.of(key))
+  );
+
+  export const parser = label(pmap(getKey, keyString));
+}
+
+
 export namespace Atom {
   export const parser = choice([
     Num.parser,
     Str.parser,
-    Sym.parser
+    Sym.parser,
+    Keyword.parser
   ]);
 }
 
@@ -104,16 +131,28 @@ export namespace List {
 }
 
 
+export namespace Dict {
+  const label = plabel('map');
+  const popen = seq([pchar(OPEN_CURLY), anySpace], 'open curly');
+  const pclose = seq([anySpace, pchar(CLOSE_CURLY)], 'close curly');
+  const kvpair = pair(SExpr.parser, after(someSpace, SExpr.parser));
+  const someSpaceOrComma = plus(satisfyRegex(/\s|,/))
+  const kvpairs = series(kvpair, someSpaceOrComma)
+  const mapOf = (kvpairs: [any, any][]) => new Map(kvpairs);
+  export const parser = label(pmap(mapOf, between(popen, kvpairs, pclose)));
+}
+
 
 SExpr.ref.parser = choice([
   Atom.parser,
-  List.parser
+  List.parser,
+  Dict.parser
 ], 's-expression');
 
 
-const source = '(true nil nilz false (100.12 99 lol)) with some remaining text';
+const source = '({:keyword 100 other 200} sym)';
 const stream = CharStream.of(source);
-const result = run(List.parser, stream);
+const result = run(SExpr.parser, stream);
 const remaining = stream.rest;
 
 

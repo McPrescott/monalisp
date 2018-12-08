@@ -4,7 +4,7 @@
 
 
 import {map} from '../../~functional/map';
-import {isChar, isWhitespace} from "../common/predicates";
+import {isChar, isWhitespace, matches} from "../common/predicates";
 import {join} from '../common/transformers';
 import {ParseFailure, Parser, Result, pmap} from "../parser";
 import {seq, star, plus, skip, pjoin} from './combinators';
@@ -21,6 +21,16 @@ export const satisfy = (
       const message = `"${stream.peek()}" does not satisfy given predicate.`;
       return ParseFailure.of(message, label, stream.info);
     }, label)
+  )
+);
+
+
+/**
+ * Return character `Parser`, matching provided *regex*.
+ */
+export const satisfyRegex = (
+  (regex: RegExp, label=`match ${regex.toString()}`) => (
+    satisfy(matches(regex), label)
   )
 );
 

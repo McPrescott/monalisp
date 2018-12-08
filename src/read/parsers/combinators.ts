@@ -4,6 +4,7 @@
 
 
 import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from "../parser";
+import { joinFlat } from "../common/transformers";
 
 
 /**
@@ -23,6 +24,48 @@ export const seq = (
       }
       return parsed;
     }, (label || parsers.map(p => p.label).join(', ')))
+  )
+);
+
+
+/**
+ * Return `Parser` which, upon success, returns the pair [*first*, *second*] of
+ * the results.
+ */
+export const pair = (
+  <A, B>(first: Parser<A>, second: Parser<B>): Parser<[A, B]> => (
+    Parser.of((stream) => {
+      const firstResult = run(first, stream);
+      if (didParseFail(firstResult))
+        return firstResult;
+      const secondResult = run(second, stream);
+      return (didParseFail(secondResult))
+        ? secondResult
+        : [firstResult, secondResult] as [A, B];
+    }, `pair (${first.label}, ${second.label})`)
+  )
+);
+
+
+/**
+ * Return `Parser` which, upon success, returns the triple [*first*, *second*,
+ * *third*] of the results.
+ */
+export const triple = (
+  <A, B, C>(first: Parser<A>, second: Parser<B>, third: Parser<C>):
+  Parser<[A, B, C]> => (
+    Parser.of((stream) => {
+      const firstResult = run(first, stream);
+      if (didParseFail(firstResult))
+        return firstResult;
+      const secondResult = run(second, stream);
+      if (didParseFail(secondResult))
+        return secondResult;
+      const thirdResult = run(third, stream);
+      return (didParseFail(thirdResult))
+        ? thirdResult
+        : [firstResult, secondResult, thirdResult] as [A, B, C];
+    }, `triple (${first.label}, ${second.label}, ${third.label})`)
   )
 );
 
@@ -245,7 +288,15 @@ export const attempt = <T>(parser: Parser<T>, label?: string) => (
  * Join list contained in *parser* into a string.
  */
 export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
-  pmap((parsed) => parsed.join(sep), parser)
+  parser.map((parsed) => parsed.join(sep))
+);
+
+
+/**
+ * Flatten and join nested lists contained in *parser* into a string.
+ */
+export const pjoinFlat = <T>(parser: Parser<T[]>, sep="") => (
+  parser.map((parsed) => joinFlat(parsed, sep))
 );
 
 
