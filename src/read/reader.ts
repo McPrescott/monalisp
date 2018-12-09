@@ -43,15 +43,15 @@ export namespace Str {
 }
 
 
-export namespace Sym {
+export namespace Id {
   const begin = /[a-z+\-*/=<>&|!?$_]/i;
   const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
-  const table: {[key: string]: Symbol} = Object.create(null);
+  const table: {[key: string]: Id} = Object.create(null);
 
-  export class Symbol {
+  export class Id {
     static of(identifier: string) {
-      return new Symbol(identifier);
+      return new Id(identifier);
     }
     
     constructor(public readonly identifier: string) {}
@@ -66,7 +66,7 @@ export namespace Sym {
       ? literals[identifier]
       : (identifier in table)
         ? table[identifier]
-        : (table[identifier] = Symbol.of(identifier))
+        : (table[identifier] = Id.of(identifier))
   );
 
   export const parser = pmap(getSymbol, pjoin(
@@ -112,7 +112,7 @@ export namespace Atom {
   export const parser = choice([
     Num.parser,
     Str.parser,
-    Sym.parser,
+    Id.parser,
     Keyword.parser
   ]);
 }

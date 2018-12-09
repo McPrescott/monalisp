@@ -5,7 +5,7 @@
 
 import {curry} from './~hyfns/index';
 import {ParseFailure} from './read/parse/parser';
-import {Sym, Keyword} from './read/reader';
+import {Id, Keyword} from './read/reader';
 
 
 // -- Builtin Extensions -------------------------------------------------------
@@ -65,7 +65,7 @@ const mapArgs = (arg): string => {
   else if (arg instanceof ParseFailure) {
     return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`;
   }
-  else if (arg instanceof Sym.Symbol) {
+  else if (arg instanceof Id.Id) {
     return `$(${arg.identifier})`;
   }
   else if (arg instanceof Keyword.Keyword) {
