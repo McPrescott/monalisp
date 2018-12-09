@@ -63,17 +63,20 @@ export const flatten = (list: any[]) => {
       flat.push(elem);
   }
   return flat;
-}
+};
 
 
 /**
  * Join list into a string.
  */
-export const join = <T>(ls: T[], sep="") => (
-  ls.join(sep)
+export const join = <T>(list: T[], sep="") => (
+  list.join(sep)
 );
 
 
-export const joinFlat = (ls: any[], sep="") => (
-  flatten(ls).join(sep)
+/**
+ * Join nested lists into a string.
+ */
+export const joinFlat = (list: any[], sep="") => (
+  flatten(list).join(sep)
 );

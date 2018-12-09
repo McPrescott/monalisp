@@ -4,9 +4,9 @@
 
 
 import {map} from '../../../~hyfns/index';
-import {isChar, isWhitespace, matches} from "../common/predicates";
+import {isChar, isWhitespace, matches} from '../common/predicates';
 import {join} from '../common/transformers';
-import {ParseFailure, Parser, Result, pmap} from "../parser";
+import {ParseFailure, Parser, Result, pmap} from '../parser';
 import {seq, star, plus, skip, pjoin} from './combinators';
 
 

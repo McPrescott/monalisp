@@ -3,20 +3,22 @@
 //------------------------------------------------------------------------------
 
 
-import {NL, EMPTY} from "./common/chars";
+import {NL, EMPTY} from './common/chars';
 
 
 export namespace CharStream {
+
   export type State = {
     pos: number;
     line: number;
     column: number;
-  }
+  };
+
   export type Info = {
     lineText: string;
     line: number;
     column: number;
-  }
+  };
 }
 
 
@@ -118,7 +120,7 @@ export class CharStream {
       this.column = 0;
     }
     else {
-      this.column++
+      this.column++;
     }
     this.pos++;
   }

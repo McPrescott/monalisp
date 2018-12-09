@@ -88,10 +88,12 @@ export namespace Keyword {
     static of(key: string) {
       return new Keyword(key);
     }
+
     public readonly uid: Symbol;
+
     constructor(public readonly key: string) {
       this.uid = Symbol(`Key ${key}`);
-    };
+    }
   }
 
   export const table: {[key: string]: Keyword} = Object.create(null);
@@ -136,8 +138,8 @@ export namespace Dict {
   const popen = seq([pchar(OPEN_CURLY), anySpace], 'open curly');
   const pclose = seq([anySpace, pchar(CLOSE_CURLY)], 'close curly');
   const kvpair = pair(SExpr.parser, after(someSpace, SExpr.parser));
-  const someSpaceOrComma = plus(satisfyRegex(/\s|,/))
-  const kvpairs = series(kvpair, someSpaceOrComma)
+  const someSpaceOrComma = plus(satisfyRegex(/\s|,/));
+  const kvpairs = series(kvpair, someSpaceOrComma);
   const mapOf = (kvpairs: [any, any][]) => new Map(kvpairs);
   export const parser = label(pmap(mapOf, between(popen, kvpairs, pclose)));
 }

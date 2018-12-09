@@ -72,7 +72,7 @@ export class ParseFailure {
  * Type wrapper around a parser function.
  */
 export class Parser<T=any> {
-  
+
   /**
    * Return `Parser` that ignores given *stream* and returns given *value*.
    */
@@ -142,11 +142,9 @@ export const didParseSucceed = <T>(result: Result<T>): result is T => (
 /**
  * Run *parser* with given *stream*.
  */
-export const run: Run = (
-  curry((parser: Parser, stream: CharStream) => 
-    parser.run(stream)
-  )
-);
+export const run: Run = curry((parser: Parser, stream: CharStream) => (
+  parser.run(stream)
+));
 
 interface Run {
   <T>(parser: Parser<T>): (stream: CharStream) => Result<T>;
@@ -164,7 +162,7 @@ export const preturn = <T>(returnValue: T): Parser<T> => (
 
 /**
  * Map *fn* over given *parser*.
- * 
+ *
  * `pmap :: (A -> B) -> Parser<A> -> Parser<B>`
  */
 export const pmap: PMap = curry((fn: Unary, parser: Parser) => (
@@ -177,10 +175,9 @@ interface PMap {
 }
 
 
-
 /**
  * Apply *parsed* to the resulting function of *parser*.
- * 
+ *
  * `papply :: Parser<a -> b> -> Parser<a> -> Parser<b>`
  */
 export const papply: PApply = curry(
@@ -203,10 +200,9 @@ interface PApply {
 }
 
 
-
 /**
  * Apply the result of *parser* to *producer*, returning a new `Parser`.
- * 
+ *
  * `pbind :: (A -> Parser<B>) -> Parser<A> -> Parser<B>`
  */
 export const pbind: PBind = (
@@ -244,9 +240,12 @@ interface PLabel {
 }
 
 
-export const labelledParser = <T>(fn: ParseFn<T>, label: string) => (
+/**
+ * Create `Parser` with given *parseFn* and *label*.
+ */
+export const labelledParser = <T>(parseFn: ParseFn<T>, label: string) => (
   Parser.of((stream) => {
-    let result = fn(stream);
+    let result = parseFn(stream);
     if (didParseFail(result))
       result.label = label;
     return result;

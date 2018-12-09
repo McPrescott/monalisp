@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from "../parser";
+import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from '../parser';
 import {joinFlat} from '../common/transformers';
 
 
@@ -141,7 +141,7 @@ export const choice = <T>(parsers: Parser<T>[], label?: string) => (
       if (didParseSucceed(current))
         return current;
     }
-    return current
+    return current;
   }, (label || `Choice of ${parsers.map(p => p.label).join(', ')}`))
 );
 
@@ -192,7 +192,7 @@ export const between = (
         return result;
       const postResult = run(post, stream);
       if (didParseFail(postResult))
-        return postResult
+        return postResult;
       return result;
     })
   )
@@ -234,7 +234,7 @@ export const minSeries = (
         result = run(sepElement, stream);
       }
       if (elements.length < min)
-        return result;  
+        return result;
       return elements;
     })
   )

@@ -60,7 +60,7 @@ export const parseBinaryDigits = (
  */
 export const parseInt = (
   seq([
-    opt(parseMinus), 
+    opt(parseMinus),
     parseDigits
   ], 'integer').map(joinToInt)
 );

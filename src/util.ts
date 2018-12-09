@@ -63,29 +63,30 @@ const mapArgs = (arg): string => {
       : quote(arg);
   }
   else if (arg instanceof ParseFailure) {
-    return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`
+    return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`;
   }
   else if (arg instanceof Sym.Symbol) {
     return `$(${arg.identifier})`;
   }
   else if (arg instanceof Keyword.Keyword) {
-    return arg.key
+    return arg.key;
   }
   else if (arg instanceof Map) {
-    let str = ''
+    let str = String.empty();
     let i = 0;
     for (const pair of arg) {
       str += pair.map(mapArgs).join(' => ');
       if (++i < arg.size)
         str += ', ';
     }
-    return `{${str}}`
+    return `{${str}}`;
   }
   else if (arg === null) {
-    return 'nil'
+    return 'nil';
   }
   return arg.toString();
-}
+};
+
 
 export const log = (...args) => {
   let transformed = args.map(mapArgs);
