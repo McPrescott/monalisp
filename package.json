@@ -4,7 +4,8 @@
   "description": "Custom lisp for Monagen.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Everything's all good!\""
+    "test": "mocha --opts mocha.conf",
+    "test:auto": "mocha --opts mocha.conf --watch"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,10 @@
   "author": "mcprescott",
   "license": "MIT",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/mocha": "^5.2.5",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
 }
