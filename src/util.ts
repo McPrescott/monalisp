@@ -8,25 +8,6 @@ import {ParseFailure} from './read/parse/parser';
 import {Sym, Keyword} from './read/reader';
 
 
-
-// -- Function Types -----------------------------------------------------------
-
-
-export type AnyFn = (...args: any[]) => any;
-export type Unary<T=any, R=T> = (arg: T) => R;
-export type Binary<T0=any, T1=T0, R=T0> = (...args: [T0, T1]) => R;
-export type Ternary<T0=any, T1=T0, T2=T0, R=T0> = (...args: [T0, T1, T2]) => R;
-export type UnaryPred<T> = (arg: T) => boolean;
-export type GenericPred = <T extends any[]>(...args: T) => boolean;
-export type ArgsOf<T extends AnyFn> = (
-  T extends ((...x: infer A) => any) ? A : never
-);
-export type ReturnOf<T extends AnyFn> = (
-  T extends ((...x: any[]) => (infer R)) ? R : never
-);
-
-
-
 // -- Builtin Extensions -------------------------------------------------------
 
 //@ts-ignore

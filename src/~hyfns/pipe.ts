@@ -1,5 +1,3 @@
-import {AnyFn, ReturnOf, ArgsOf} from "../util";
-
 /**
  * Return function that successively chains provided *fns*, passing the return
  * as an argument the return value of the previous function.

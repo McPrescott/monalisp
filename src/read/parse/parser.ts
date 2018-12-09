@@ -4,7 +4,6 @@
 
 
 import {curry} from '../../~hyfns/index';
-import {Unary} from '../../util';
 import {CharStream} from './char-stream';
 import {SPACE} from './common/chars';
 
