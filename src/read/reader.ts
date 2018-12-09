@@ -47,7 +47,7 @@ export namespace Sym {
   const begin = /[a-z+\-*/=<>&|!?$_]/i;
   const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
-  const table: {[key: string]: Symbol} = {};
+  const table: {[key: string]: Symbol} = Object.create(null);
 
   export class Symbol {
     static of(identifier: string) {
@@ -94,7 +94,7 @@ export namespace Keyword {
     };
   }
 
-  export const table: {[key: string]: Keyword} = {};
+  export const table: {[key: string]: Keyword} = Object.create(null);
 
   export const getKey = (key: string) => (
     (key in table) 
