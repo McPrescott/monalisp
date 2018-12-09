@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {NL, NULL, EMPTY} from "./common/chars";
+import {NL, EMPTY} from "./common/chars";
 
 
 export namespace CharStream {

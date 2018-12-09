@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from '../../~functional';
+import {curry} from '../../../~hyfns';
 import {Regex} from './regex';
 
 

@@ -3,13 +3,13 @@
 //------------------------------------------------------------------------------
 
 
-import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from './common/chars';
-import {matches, isChar, invert} from './common/predicates';
-import {CharStream} from './char-stream';
-import {run, pmap, plabel} from './parser';
-import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat} from './parsers/combinators';
-import {satisfy, pchar, anySpace, someSpace, satisfyRegex} from './parsers/string';
-import {parseFloat} from './parsers/numeric';
+import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from './parse/common/chars';
+import {matches, isChar, invert} from './parse/common/predicates';
+import {CharStream} from './parse/char-stream';
+import {run, pmap, plabel} from './parse/parser';
+import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat} from './parse/parsers/combinators';
+import {satisfy, pchar, anySpace, someSpace, satisfyRegex} from './parse/parsers/string';
+import {parseFloat} from './parse/parsers/numeric';
 import {log} from '../util';
 
 

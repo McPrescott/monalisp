@@ -3,13 +3,13 @@
 //------------------------------------------------------------------------------
 
 
-import {pipe} from '../../~functional';
+import {pipe} from '../../../~hyfns';
 import {MINUS, DOT} from '../common/chars';
+import {Regex} from '../common/regex';
 import {isDigit, matches} from '../common/predicates';
 import {toInt, join, toFloat, hexStringToNumber, octalStringToNumber, binaryStringToNumber} from '../common/transformers';
 import {satisfy, pchar} from './string';
 import {plus, seq, opt, pjoin} from './combinators';
-import {Regex} from '../common/regex';
 
 
 const parseMinus = pchar(MINUS);

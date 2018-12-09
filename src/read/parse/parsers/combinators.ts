@@ -4,7 +4,7 @@
 
 
 import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from "../parser";
-import { joinFlat } from "../common/transformers";
+import {joinFlat} from '../common/transformers';
 
 
 /**

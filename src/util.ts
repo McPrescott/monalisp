@@ -3,8 +3,8 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from './~functional';
-import {ParseFailure} from './read/parser';
+import {curry} from './~hyfns';
+import {ParseFailure} from './read/parse/parser';
 import {Sym, Keyword} from './read/reader';
 
 

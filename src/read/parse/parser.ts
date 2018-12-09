@@ -3,8 +3,8 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from '../~functional';
-import {Unary} from '../util';
+import {curry} from '../../~hyfns';
+import {Unary} from '../../util';
 import {CharStream} from './char-stream';
 import {SPACE} from './common/chars';
 
