@@ -3,8 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {curry, is, not} from 'ramda';
-import {Failure} from './base';
+import {curry} from './~functional';
 import {ParseFailure} from './read/parser';
 import {Sym, Keyword} from './read/reader';
 
@@ -49,11 +48,9 @@ Array.empty = Array.prototype.empty = [];
 export const isStr = (value: any) => typeof value === 'string';
 
 
-export const isFailure = is(Failure);
-
 
 export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
-  not(predicate(value))
+  !(predicate(value))
 ));
 
 

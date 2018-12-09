@@ -19,8 +19,5 @@
   ],
   "author": "mcprescott",
   "license": "MIT",
-  "dependencies": {
-    "@types/ramda": "^0.25.42",
-    "ramda": "^0.25.0"
-  }
+  "dependencies": {}
 }

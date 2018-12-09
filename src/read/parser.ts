@@ -4,7 +4,6 @@
 
 
 import {curry} from '../~functional';
-import {Failure} from '../base';
 import {Unary} from '../util';
 import {CharStream} from './char-stream';
 import {SPACE} from './common/chars';
@@ -39,7 +38,7 @@ export const success = new ParseSuccess();
 /**
  * Parsing failure type.
  */
-export class ParseFailure extends Failure {
+export class ParseFailure {
 
   /**
    * Static constructor of `ParseFailure`.
@@ -52,9 +51,7 @@ export class ParseFailure extends Failure {
     public message: string,
     public label="Unknown",
     public info?: CharStream.Info
-  ){
-    super();
-  }
+  ) {};
 
   /**
    * Return error message for parse failure.
