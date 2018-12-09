@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from './~hyfns';
+import {curry} from './~hyfns/index';
 import {ParseFailure} from './read/parse/parser';
 import {Sym, Keyword} from './read/reader';
 
@@ -29,15 +29,26 @@ export type ReturnOf<T extends AnyFn> = (
 
 // -- Builtin Extensions -------------------------------------------------------
 
+//@ts-ignore
+Object.defineProperty(Number, 'empty', {
+  value: () => (0),
+  enumerable: false,
+  writable: false
+});
 
-// @ts-ignore
-Number.empty = Number.prototype.empty = 0;
+//@ts-ignore
+Object.defineProperty(String, 'empty', {
+  value: () => (""),
+  enumerable: false,
+  writable: false
+});
 
-// @ts-ignore
-String.empty = String.prototype.empty = '';
-
-// @ts-ignore
-Array.empty = Array.prototype.empty = [];
+//@ts-ignore
+Object.defineProperty(Array, 'empty', {
+  value: () => ([]),
+  enumerable: false,
+  writable: false
+});
 
 
 

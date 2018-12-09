@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {pipe} from '../../../~hyfns';
+import {pipe} from '../../../~hyfns/index';
 import {MINUS, DOT} from '../common/chars';
 import {Regex} from '../common/regex';
 import {isDigit, matches} from '../common/predicates';

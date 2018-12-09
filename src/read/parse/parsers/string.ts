@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {map} from '../../../~hyfns';
+import {map} from '../../../~hyfns/index';
 import {isChar, isWhitespace, matches} from "../common/predicates";
 import {join} from '../common/transformers';
 import {ParseFailure, Parser, Result, pmap} from "../parser";

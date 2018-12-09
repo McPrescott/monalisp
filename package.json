@@ -19,5 +19,6 @@
   ],
   "author": "mcprescott",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {}
 }
