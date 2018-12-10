@@ -2,21 +2,18 @@
 // -- MONALISP READER
 //------------------------------------------------------------------------------
 
+
 import {Identifier} from '../builtin/identifier';
 import {Keyword} from '../builtin/keyword';
 import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from './parse/common/chars';
 import {matches, isChar, invert} from './parse/common/predicates';
 import {CharStream} from './parse/char-stream';
 import {run, pmap, plabel} from './parse/parser';
-import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat} from './parse/parsers/combinators';
+import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat, completion} from './parse/parsers/combinators';
 import {satisfy, pchar, anySpace, someSpace, satisfyRegex} from './parse/parsers/string';
 import {parseFloat} from './parse/parsers/numeric';
 import {log} from '../util';
 
-
-/// `true`, `false`, `null`, etc. can be kept in a symbol table, or should these
-/// be interpreted by the reader and be converted into their corresponding
-/// values before being sent for evaluation?
 
 const literals = {
   nil: null,
@@ -96,11 +93,10 @@ export namespace Atom {
 
 
 export namespace SExpr {
-  export const [ref, parser] = fref();
+  export const [ref, parser] = fref<SExpr>();
 }
 
 
-// for now, a list cannot contain other lists, only atoms.
 export namespace List {
   const label = plabel('list');
   const popen = seq([pchar(OPEN_PAREN), anySpace], 'open paren');
@@ -129,11 +125,12 @@ SExpr.ref.parser = choice([
 ], 's-expression');
 
 
-const source = '({:keyword 100 other 200} sym)';
-const stream = CharStream.of(source);
-const result = run(SExpr.parser, stream);
-const remaining = stream.rest;
+const monalispParser = completion(SExpr.parser);
 
 
-log('! Result:', result); 
-log('! Remain:', remaining);
+/**
+ * Parse given Monalisp *code*.
+ */
+export const read = (code: string) => (
+  run(monalispParser, CharStream.of(code))
+);

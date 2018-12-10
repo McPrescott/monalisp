@@ -82,6 +82,13 @@ export class CharStream {
   }
 
   /**
+   * Check whether all characters have been streamed.
+   */
+  isDone() {
+    return this.pos >= this.length;
+  }
+
+  /**
    * Return current character, updating internal state.
    */
   next() {
@@ -113,7 +120,6 @@ export class CharStream {
   skip() {
     if (this.pos >= this.length)
       return;
-
     const char = this.source[this.pos];
     if (char === NL) {
       this.line++;

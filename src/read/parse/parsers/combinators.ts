@@ -285,6 +285,26 @@ export const attempt = <T>(parser: Parser<T>, label?: string) => (
 
 
 /**
+ * Return `Parser` that runs given *parser* until encountering the end of
+ * `CharStream`, or until `ParseFailure`. Upon success a list of each parsed
+ * value is returned; upon failure, the `ParseFailure` is returned immediately.
+ */
+export const completion = <T>(parser: Parser<T>) => (
+  Parser.of((stream) => {
+    const results: T[] = [];
+    let result: Result<T>;
+    while (!stream.isDone()) {
+      result = run(parser, stream);
+      if (didParseFail(result))
+        return result;
+      results.push(result);
+    }
+    return results;
+  })
+);
+
+
+/**
  * Join list contained in *parser* into a string.
  */
 export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
