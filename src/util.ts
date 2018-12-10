@@ -4,8 +4,9 @@
 
 
 import {curry} from './~hyfns/index';
+import {Keyword} from './builtin/keyword';
+import {Identifier} from './builtin/identifier';
 import {ParseFailure} from './read/parse/parser';
-import {Id, Keyword} from './read/reader';
 
 
 // -- Builtin Extensions -------------------------------------------------------
@@ -65,10 +66,10 @@ const mapArgs = (arg): string => {
   else if (arg instanceof ParseFailure) {
     return `\n  ${arg.toString().replace(/\n/g, '\n  ')}`;
   }
-  else if (arg instanceof Id.Id) {
-    return `$(${arg.identifier})`;
+  else if (arg instanceof Identifier) {
+    return `'${arg.name}`;
   }
-  else if (arg instanceof Keyword.Keyword) {
+  else if (arg instanceof Keyword) {
     return arg.key;
   }
   else if (arg instanceof Map) {

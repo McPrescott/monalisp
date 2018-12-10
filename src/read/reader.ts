@@ -2,7 +2,8 @@
 // -- MONALISP READER
 //------------------------------------------------------------------------------
 
-
+import {Identifier} from '../builtin/identifier';
+import {Keyword} from '../builtin/keyword';
 import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from './parse/common/chars';
 import {matches, isChar, invert} from './parse/common/predicates';
 import {CharStream} from './parse/char-stream';
@@ -47,29 +48,17 @@ export namespace Id {
   const begin = /[a-z+\-*/=<>&|!?$_]/i;
   const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
-  const table: {[key: string]: Id} = Object.create(null);
+  const table: {[key: string]: Identifier} = Object.create(null);
 
-  export class Id {
-    static of(identifier: string) {
-      return new Id(identifier);
-    }
-    
-    constructor(public readonly identifier: string) {}
-    
-    toString() {
-      return this.identifier;
-    }
-  }
-
-  const getSymbol = (identifier: string) => (
-    (identifier in literals)
-      ? literals[identifier]
-      : (identifier in table)
-        ? table[identifier]
-        : (table[identifier] = Id.of(identifier))
+  const getIdentifier = (name: string) => (
+    (name in literals)
+      ? literals[name]
+      : (name in table)
+        ? table[name]
+        : (table[name] = Identifier.of(name))
   );
 
-  export const parser = pmap(getSymbol, pjoin(
+  export const parser = pmap(getIdentifier, pjoin(
     seq([
       satisfy(matches(begin)),
       pjoin(star(satisfy(matches(contain))))
@@ -78,23 +67,11 @@ export namespace Id {
 }
 
 
-export namespace Keyword {
+export namespace Key {
   const label = plabel('keyword');
   const pcolon = pchar(COLON);
   const validChars = satisfyRegex(/[a-z0-9+\-*/=<>&|!?$_]/i);
   const keyString = pjoinFlat(pair(pcolon, plus(validChars)));
-  
-  export class Keyword {
-    static of(key: string) {
-      return new Keyword(key);
-    }
-
-    public readonly uid: Symbol;
-
-    constructor(public readonly key: string) {
-      this.uid = Symbol(`Key ${key}`);
-    }
-  }
 
   export const table: {[key: string]: Keyword} = Object.create(null);
 
@@ -113,7 +90,7 @@ export namespace Atom {
     Num.parser,
     Str.parser,
     Id.parser,
-    Keyword.parser
+    Key.parser
   ]);
 }
 
