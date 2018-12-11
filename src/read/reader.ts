@@ -9,10 +9,9 @@ import {DBL_QUT, OPEN_PAREN, CLOSE_PAREN, OPEN_CURLY, CLOSE_CURLY, COLON} from '
 import {matches, isChar, invert} from './parse/common/predicates';
 import {CharStream} from './parse/char-stream';
 import {run, pmap, plabel} from './parse/parser';
-import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat, completion} from './parse/parsers/combinators';
+import {pjoin, seq, star, skip, choice, between, series, fref, pair, after, plus, pjoinFlat, completion, attempt} from './parse/parsers/combinators';
 import {satisfy, pchar, anySpace, someSpace, satisfyRegex} from './parse/parsers/string';
 import {parseFloat} from './parse/parsers/numeric';
-import {log} from '../util';
 
 
 const literals = {
@@ -23,7 +22,7 @@ const literals = {
 
 
 export namespace Num {
-  export const parser = parseFloat;
+  export const parser = attempt(parseFloat);
 }
 
 
@@ -41,7 +40,7 @@ export namespace Str {
 }
 
 
-export namespace Id {
+export namespace ID {
   const begin = /[a-z+\-*/=<>&|!?$_]/i;
   const contain = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
@@ -86,7 +85,7 @@ export namespace Atom {
   export const parser = choice([
     Num.parser,
     Str.parser,
-    Id.parser,
+    ID.parser,
     Key.parser
   ]);
 }

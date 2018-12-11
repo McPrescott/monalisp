@@ -33,5 +33,13 @@ describe('Monalisp', () => {
       const expect = 14;
       execEquals(input, expect);
     })
-  })
+  });
+
+  describe('Subtraction Function', () => {
+    it('should return the difference of the values provided', () => {
+      const input = '(def x 30)(def y 8)(- x y)';
+      const expect = 22;
+      execEquals(input, expect);
+    })
+  });
 });
