@@ -3,43 +3,48 @@ import {assert, equals} from './assert';
 import {read, evaluate, execute} from '../src/main';
 
 
-const execEquals = (input: string, expect: any) => {
-  const result = execute(input);
-  equals(result, expect, `${input} !== ${expect}, got ${result}`);
+
+const execIt = (source: string, expect: any) => {
+  it(`${source} = ${expect}`, () => {
+    const result = execute(source);
+    equals(result, expect, `Got: ${result}`);
+  });
 }
 
 
+const describeIt = (title: string, source: string, expect: any) => {
+  describe(title, () => {
+    execIt(source, expect);
+  });
+};
+
+
 describe('Monalisp', () => {
-  describe('Static Numbers', () => {
-    it('should return same numerical value', () => {
-      const input = '5';
-      const expect = 5;
-      const output = execute(input);
-      equals(output, expect);
-    });
-  });
+  describeIt('Static Number',
+    '5', 5
+  );
 
-  describe('Identifier Definition', () => {
-    it('should return the value bound to the given identifier', () => {
-      const input = '(def id 123) id';
-      const expect = 123;
-      execEquals(input, expect);
-    })
-  });
+  describeIt('Identifier Definition',
+    '(def id 123) id', 123
+  );
 
-  describe('Addition Function', () => {
-    it('should return the sum of the values provided', () => {
-      const input = '(def x 2) (+ x 3 4 5)'
-      const expect = 14;
-      execEquals(input, expect);
-    })
-  });
+  describeIt('Addition Function',
+    '(def x 2) (+ x 3 4 5)', 14
+  );
 
-  describe('Subtraction Function', () => {
-    it('should return the difference of the values provided', () => {
-      const input = '(def x 30)(def y 8)(- x y)';
-      const expect = 22;
-      execEquals(input, expect);
-    })
-  });
+  describeIt('Subtraction Function',
+    '(def x 30)(def y 8)(- x y)', 22
+  );
+
+  describeIt('Multiplication Function',
+    '(def a 3)(def b 5)(* a b)', 15
+  );
+
+  describeIt('Division Function',
+    '(def t 100)(def b 2)(/ t b)', 50
+  );
+
+  describeIt('Nested Addition & Subtration',
+    '(+ (+ 4 2 5) 8 (- 18 10))', 27
+  );
 });

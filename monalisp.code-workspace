@@ -4,6 +4,9 @@
 			"path": "."
 		},
 		{
+			"path": "/jmcp/dev/javascript/monagen"
+		},
+		{
 			"path": "/jmcp/docs"
 		},
 		{

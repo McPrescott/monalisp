@@ -11,6 +11,7 @@ import {map, curry} from '../~hyfns';
 
 type SpecialForm = (scope: IDTable, ...expressions: SExpr[]) => any;
 
+
 const specialForm: {[key: string]: SpecialForm} = Object.create(null);
 
 specialForm['def'] = (scope: IDTable, id: SExpr, value: SExpr, ...r) => {
@@ -25,7 +26,7 @@ specialForm['def'] = (scope: IDTable, id: SExpr, value: SExpr, ...r) => {
 };
 
 
-const builtin: IDTable = Object.create(null);
+const builtin: {[key: string]: Function} = Object.create(null);
 
 builtin['+'] = (scope: IDTable, ...args: any) => {
   let sum = 0;
@@ -33,6 +34,28 @@ builtin['+'] = (scope: IDTable, ...args: any) => {
     sum += n;
   }
   return sum;
+};
+
+builtin['-'] = (scope: IDTable, ...args: any[]) => {
+  let difference = head(args);
+  for (const n of tail(args))
+    //@ts-ignore
+    difference -= n;
+  return difference;
+};
+
+builtin['*'] = (scope: IDTable, ...args: any[]) => {
+  let product = 1;
+  for (const n of args)
+    product *= n;
+  return product;
+}
+
+builtin['/'] = (scope: IDTable, ...args: any[]) => {
+  let quotient = head(args);
+  for (const n of tail(args))
+    quotient /= n;
+  return quotient;
 }
 
 
