@@ -125,7 +125,7 @@ SExpr.ref.parser = choice([
 ], 's-expression');
 
 
-const monalispParser = completion(SExpr.parser);
+const monalispParser = completion(after(anySpace, SExpr.parser));
 
 
 /**

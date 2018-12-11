@@ -18,6 +18,6 @@ export {evaluate} from './eval/evaluator';
 export const execute = (code: string) => {
   const parsed = read(code);
   if (didParseFail(parsed))
-    throw new SyntaxError(parsed.message);
+    throw new SyntaxError(parsed.toString());
   return evaluate(parsed);
 };

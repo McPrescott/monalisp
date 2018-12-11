@@ -12,34 +12,50 @@ import {ParseFailure} from './read/parse/parser';
 // -- Builtin Extensions -------------------------------------------------------
 
 //@ts-ignore
-Object.defineProperty(Number, 'empty', {
+(Number.empty || Object.defineProperty(Number, 'empty', {
   value: () => (0),
   enumerable: false,
   writable: false
-});
+}));
 
 //@ts-ignore
-Object.defineProperty(String, 'empty', {
+(String.empty || Object.defineProperty(String, 'empty', {
   value: () => (""),
   enumerable: false,
   writable: false
-});
+}));
 
 //@ts-ignore
-Object.defineProperty(Array, 'empty', {
+(Array.empty || Object.defineProperty(Array, 'empty', {
   value: () => ([]),
   enumerable: false,
   writable: false
-});
+}));
+
+
+
+// -- Array Functions ----------------------------------------------------------
+
+
+/**
+ * Return the first element of *list*.
+ */
+export const head = <T>(list: T[]): T => (
+  list[0]
+);
+
+
+/**
+ * Return new `Array` containing all but the first element of *list*.
+ */
+export const tail = <T>(list: T[]): T[] => (
+  list.filter((_, i) => i !== 0)
+);
 
 
 
 
 // -- Misc Functions -----------------------------------------------------------
-
-
-export const isStr = (value: any) => typeof value === 'string';
-
 
 
 export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
