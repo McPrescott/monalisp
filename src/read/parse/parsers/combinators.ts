@@ -200,6 +200,15 @@ export const between = (
 
 
 /**
+ * Return `Parser` that runs *surround* before and after given *parser*,
+ * returning only the result of *parser* upon successful completion.
+ */
+export const surround = <T>(parser: Parser<T>, surround: Parser) => (
+  between(surround, parser, surround)
+);
+
+
+/**
  * Return `Parser` that parses a series elements resulting from given *element*
  * `Parser`, separated by *separator*. This parser never fails; if
  * failure occurs on the first parsing attempt, the empty list is returned.

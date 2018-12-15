@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {ParseFailure, Parser, run} from './parse/parser';
+import {ParseFailure, Parser, run, plabel} from './parse/parser';
 import {macroTable} from './macros/table';
 
 
@@ -19,4 +19,4 @@ export const macroParser = Parser.of((stream) => {
     'macro',
     stream.info
   );
-});
+}, 'reader-macro');

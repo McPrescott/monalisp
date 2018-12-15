@@ -18,7 +18,7 @@ export const satisfy = (
     Parser.of((stream): Result<string> => {
       if (predicate(stream.peek()))
         return stream.next();
-      const message = `"${stream.peek()}" does not satisfy given predicate.`;
+      const message = `Unexpected "${stream.peek()}".`;
       return ParseFailure.of(message, label, stream.info);
     }, label)
   )

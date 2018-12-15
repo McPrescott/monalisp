@@ -83,5 +83,5 @@ export const ptag = <T>(parser: Parser<T>): TaggedParser<T> => (
     if (didParseFail(expression))
       return expression;
     return Tagged.of(expression, getTypeOf(expression), info);
-  })
+  }, parser.label)
 );

@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 
 
+import {plabel} from './parse/parser';
 import {fref, choice} from './parse/parsers/combinators';
 import {ptag, Tagged} from './tagging';
 import {atomParser, AtomType} from './atom';
@@ -57,7 +58,9 @@ ref.parser = ptag(choice<SExpression>(
 ));
 
 
+const label = plabel('s-expression');
+  
 /**
  * Monalisp `SExpression` `Parser`.
  */
-export const sExpressionParser = parser;
+export const sExpressionParser = label(parser);

@@ -251,3 +251,26 @@ export const labelledParser = <T>(parseFn: ParseFn<T>, label: string) => (
     return result;
   }, label)
 );
+
+
+/**
+ * Map given *fn* over `ParseFailure` of given *parser* on error, successfully
+ * parsed values are passed through unmodified.
+ */
+export const perror: PError = curry(
+  <T>(fn: (failure: ParseFailure) => ParseFailure, parser: Parser<T>) => (
+    Parser.of((stream) => {
+      const result = run(parser, stream);
+      if (didParseFail(result))
+        return fn(result);
+      return result;
+    })
+  )
+);
+
+interface PError {
+  <T>(fn: (failure: ParseFailure) => ParseFailure, parser: Parser<T>):
+    Parser<T>;
+  (fn: (failure: ParseFailure) => ParseFailure):
+    <T>(parser: Parser<T>) => Parser<T>;
+}
