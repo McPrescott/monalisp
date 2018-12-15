@@ -207,38 +207,38 @@
 // -- S-Expression -------------------------------------------------------------
 
 
-declare class Identifier {
-  static of(name: string): Identifier;
-  public readonly name: string;
-  constructor(name: string);
-  toString(): string;
-}
+// declare class Identifier {
+//   static of(name: string): Identifier;
+//   public readonly name: string;
+//   constructor(name: string);
+//   toString(): string;
+// }
 
 
-declare class Keyword {
-  static of(key: string): Keyword;
-  public readonly uid: Symbol;
-  public readonly key: string;
-  constructor(key: string);
-}
+// declare class Keyword {
+//   static of(key: string): Keyword;
+//   public readonly uid: Symbol;
+//   public readonly key: string;
+//   constructor(key: string);
+// }
 
 
-type AtomType =
-  | null
-  | boolean
-  | string
-  | number
-  | Identifier
-  | Keyword;
+// type AtomType =
+//   | null
+//   | boolean
+//   | string
+//   | number
+//   | Identifier
+//   | Keyword;
 
-type SExpr =
-  | AtomType
-  | List
-  | Dict;
+// type SExpr =
+//   | AtomType
+//   | List
+//   | Dict;
 
-interface Dict extends Map<SExpr, SExpr> {}
+// interface Dict extends Map<SExpr, SExpr> {}
 
-interface List extends Array<SExpr> {}
+// interface List extends Array<SExpr> {}
 
 
 // -- Builtin Extensions -------------------------------------------------------
