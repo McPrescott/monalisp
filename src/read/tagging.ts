@@ -42,10 +42,16 @@ export class Tagged<T> {
     return new Tagged(expression, type, info);
   };
   
+  static fromExpanded<T>
+  (expression: T, type: ParseType, info: CharStream.Info) {
+    return new Tagged(expression, type, info, true);
+  }
+
   constructor(
     public readonly expression: T, 
     public readonly type: ParseType, 
-    public readonly info: CharStream.Info
+    public readonly info: CharStream.Info,
+    public readonly isExpanded: boolean = false
   ) {};
 }
 
@@ -70,7 +76,7 @@ const getTypeOf = <T>(expression: T): ParseType => {
 /**
  * Tag parsed `SExpr`s with origin and type information.
  */
-export const tag = <T>(parser: Parser<T>): TaggedParser<T> => (
+export const ptag = <T>(parser: Parser<T>): TaggedParser<T> => (
   Parser.of((stream) => {
     const info = stream.info;
     const expression = run(parser, stream);

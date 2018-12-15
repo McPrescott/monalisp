@@ -7,6 +7,7 @@ import {curry} from './~hyfns/index';
 import {Keyword} from './builtin/keyword';
 import {Identifier} from './builtin/identifier';
 import {ParseFailure} from './read/parse/parser';
+import { Tagged } from './read/tagging';
 
 
 // -- Builtin Extensions -------------------------------------------------------
@@ -71,7 +72,10 @@ export const quote = (str: string) => `"${str}"`;
 
 
 const mapArgs = (arg): string => {
-  if (Array.isArray(arg)) {
+  if (arg instanceof Tagged) {
+    return mapArgs(arg.expression);
+  }
+  else if (Array.isArray(arg)) {
     return `(${arg.map(mapArgs).join(' ')})`;
   }
   else if (typeof arg === 'string') {

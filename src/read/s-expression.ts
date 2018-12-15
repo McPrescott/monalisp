@@ -4,7 +4,7 @@
 
 
 import {fref, choice} from './parse/parsers/combinators';
-import {tag, Tagged} from './tagging';
+import {ptag, Tagged} from './tagging';
 import {atomParser, AtomType} from './atom';
 import {listParserOf} from './list';
 import {dictionaryParserOf} from './dictionary';
@@ -50,7 +50,7 @@ export const listParser = listParserOf(parser);
 export const dictionaryParser = dictionaryParserOf(parser, parser);
 
 
-ref.parser = tag(choice<SExpression>([
+ref.parser = ptag(choice<SExpression>([
   atomParser,
   listParser,
   dictionaryParser
