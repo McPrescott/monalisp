@@ -15,7 +15,7 @@ import {ptag} from './tagging';
 /**
  * `Parser` of `SExpression` or `Macro`.
  */
-const expression = choice([sExpressionParser, ptag(macroParser)]);
+const expression = choice(sExpressionParser, ptag(macroParser));
 
 
 /**

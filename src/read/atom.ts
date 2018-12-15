@@ -24,9 +24,9 @@ export type AtomType = null | boolean | string | number | Identifier | Keyword;
  * Monalisp `AtomType` `Parser`, where `AtomType` is any of `nil`, `boolean`,
  * `number`, `string`, `Identifier` or `Keyword`.
  */
-export const atomParser = plabel('atom', choice<AtomType>([
+export const atomParser = plabel('atom', choice<AtomType>(
   numberParser,
   stringParser,
   identifierParser,
   keywordParser
-]));
+));

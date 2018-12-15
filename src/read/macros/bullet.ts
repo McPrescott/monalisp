@@ -19,7 +19,7 @@ import {SExpression, sExpressionParser, List} from '../s-expression';
 
 const pdot = pchar(DOT);
 const pindexed = attempt(after(pdot, pmap(toInt, satisfyRegex(Regex.Digit))));
-const parg = choice<string|number>([pindexed, pdot]);
+const parg = choice<string|number>(pindexed, pdot);
 
 
 /**
@@ -105,7 +105,7 @@ const expanded = (
 export const bulletMacro: Parser<SExpression> = Parser.of((stream) => {
   const info = stream.info;
   const args = argumentParser();
-  const elementParser = choice([sExpressionParser, args.parser]);
+  const elementParser = choice(sExpressionParser, args.parser);
   const parser = listParserOf(elementParser);
   const expression = run(parser,  stream);
   if (didParseFail(expression))

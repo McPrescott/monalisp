@@ -50,11 +50,11 @@ export const listParser = listParserOf(parser);
 export const dictionaryParser = dictionaryParserOf(parser, parser);
 
 
-ref.parser = ptag(choice<SExpression>([
+ref.parser = ptag(choice<SExpression>(
   atomParser,
   listParser,
   dictionaryParser
-]));
+));
 
 
 /**

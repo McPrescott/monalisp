@@ -6,7 +6,7 @@
 import {map} from '../../../~hyfns/index';
 import {isChar, isWhitespace, matches} from '../common/predicates';
 import {join} from '../common/transformers';
-import {ParseFailure, Parser, Result, pmap} from '../parser';
+import {ParseFailure, Parser, Result, pmap, plabel} from '../parser';
 import {seq, star, plus, skip, pjoin} from './combinators';
 
 
@@ -48,7 +48,7 @@ export const pchar = (char: string, label=char) => (
  */
 export const pstring = (
   (searchString: string, label=searchString): Parser<string> => (
-    pjoin(seq(map(pchar, searchString), label))
+    plabel(searchString, pjoin(seq(...map(pchar, searchString))))
   )
 );
 

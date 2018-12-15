@@ -12,7 +12,7 @@ import {joinFlat} from '../common/transformers';
  * results.
  */
 export const seq = (
-  <T>(parsers: Parser<T>[], label?: string): Parser<T[]> => (
+  <T>(...parsers: Parser<T>[]): Parser<T[]> => (
     labelledParser((stream) => {
       const parsed = [];
       let result: Result;
@@ -23,7 +23,7 @@ export const seq = (
         parsed.push(result);
       }
       return parsed;
-    }, (label || parsers.map(p => p.label).join(', ')))
+    }, (parsers.map(p => p.label).join(', ')))
   )
 );
 
@@ -133,7 +133,7 @@ export const opt = <T>(parser: Parser<T>, label?: string) => (
  * Return `Parser` that sequentially attempts to given *parsers*, returning the
  * result of the first successful parse, or the result of the last failure.
  */
-export const choice = <T>(parsers: Parser<T>[], label?: string) => (
+export const choice = <T>(...parsers: Parser<T>[]) => (
   labelledParser((stream) => {
     let current: Result<T>;
     for (const parser of parsers) {
@@ -142,7 +142,7 @@ export const choice = <T>(parsers: Parser<T>[], label?: string) => (
         return current;
     }
     return current;
-  }, (label || `Choice of ${parsers.map(p => p.label).join(', ')}`))
+  }, (`Choice of ${parsers.map(p => p.label).join(', ')}`))
 );
 
 

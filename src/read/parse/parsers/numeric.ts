@@ -59,10 +59,7 @@ export const parseBinaryDigits = (
  * `Parser` for an integer of base ten, returns a number.
  */
 export const parseInt = (
-  seq([
-    opt(parseMinus),
-    parseDigits
-  ], 'integer').map(joinToInt)
+  seq(opt(parseMinus), parseDigits).map(joinToInt)
 );
 
 
@@ -70,14 +67,14 @@ export const parseInt = (
  * `Parser` for float, with optional sign and decimal places.
  */
 export const parseFloat = (
-  seq([
+  seq(
     opt(parseMinus),
     parseDigits,
-    opt(pjoin(seq([
+    opt(pjoin(seq(
       parseDot,
       parseDigits
-    ])))
-  ], 'float').map(joinToFloat)
+    )))
+  ).map(joinToFloat)
 );
 
 
@@ -85,10 +82,7 @@ export const parseFloat = (
  * `Parser` for hexadecimal number with optional sign.
  */
 export const parseHex = (
-  seq([
-    opt(parseMinus),
-    parseHexDigits
-  ], 'hexadecimal number').map(pipe(join, hexStringToNumber))
+  seq(opt(parseMinus), parseHexDigits).map(pipe(join, hexStringToNumber))
 );
 
 
@@ -96,10 +90,7 @@ export const parseHex = (
  * `Parser` for octal number with optional sign.
  */
 export const parseOctal = (
-  seq([
-    opt(parseMinus),
-    parseOctalDigits
-  ], 'octal number').map(pipe(join, octalStringToNumber))
+  seq(opt(parseMinus), parseOctalDigits).map(pipe(join, octalStringToNumber))
 );
 
 
@@ -107,8 +98,5 @@ export const parseOctal = (
  * `Parser` for binary number with optional sign.
  */
 export const parseBinary = (
-  seq([
-    opt(parseMinus),
-    parseBinaryDigits
-  ], 'binary number').map(pipe(join, binaryStringToNumber))
+  seq(opt(parseMinus), parseBinaryDigits).map(pipe(join, binaryStringToNumber))
 );
