@@ -204,17 +204,19 @@ export const between = (
  * `Parser`, separated by *separator*. This parser never fails; if
  * failure occurs on the first parsing attempt, the empty list is returned.
  */
-export const series = <T>(element: Parser<T>, separator: Parser) => (
-  Parser.of((stream) => {
-    const elements = [];
-    const sepElement = after(separator, element);
-    let result: Result<T> = run(element, stream);
-    while (didParseSucceed(result)) {
-      elements.push(result);
-      result = run(sepElement, stream);
-    }
-    return elements;
-  })
+export const series = (
+  <T>(element: Parser<T>, separator: Parser): Parser<T[]> => (
+    Parser.of((stream) => {
+      const elements = [];
+      const sepElement = after(separator, element);
+      let result: Result<T> = run(element, stream);
+      while (didParseSucceed(result)) {
+        elements.push(result);
+        result = run(sepElement, stream);
+      }
+      return elements;
+    })
+  )
 );
 
 

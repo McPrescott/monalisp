@@ -236,7 +236,7 @@ export const plabel: PLabel = curry((label: string, parser: Parser) => (
 
 interface PLabel {
   <T>(label: string, parser: Parser<T>): Parser<T>;
-  <T>(label: string): (parser: Parser<T>) => Parser<T>;
+  (label: string): <T>(parser: Parser<T>) => Parser<T>;
 }
 
 
