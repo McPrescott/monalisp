@@ -14,7 +14,7 @@ import {pchar, satisfyRegex} from '../parse/parsers/string';
 import {Tagged, ParseType} from '../tagging';
 import {getIdentifier} from '../identifier';
 import {listParserOf} from '../list';
-import {SExpression, sExpressionParser, List} from '../s-expression';
+import {SExpression, sExprParser, List} from '../s-expression';
 
 
 const pdot = pchar(DOT);
@@ -105,7 +105,7 @@ const expanded = (
 export const bulletMacro: Parser<SExpression> = Parser.of((stream) => {
   const info = stream.info;
   const args = argumentParser();
-  const elementParser = choice(sExpressionParser, args.parser);
+  const elementParser = choice(sExprParser, args.parser);
   const parser = listParserOf(elementParser);
   const expression = run(parser,  stream);
   if (didParseFail(expression))

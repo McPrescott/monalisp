@@ -4,11 +4,9 @@
 
 
 import {plabel} from './parse/parser';
-import {fref, choice} from './parse/parsers/combinators';
-import {ptag, Tagged} from './tagging';
-import {atomParser, AtomType} from './atom';
-import {listParserOf} from './list';
-import {dictionaryParserOf} from './dictionary';
+import {fref} from './parse/parsers/combinators';
+import {Tagged} from './tagging';
+import {AtomType} from './atom';
 
 
 /**
@@ -40,27 +38,12 @@ const [ref, parser] = fref<TaggedSExpression>();
 
 
 /**
- * Monalisp `List` `Parser`.
+ * Monalisp forward reference of the `SExpression` `Parser`.
  */
-export const listParser = listParserOf(parser);
+export const sExprParserRef = ref;
 
-
-/**
- * Monalisp `Dictionary` `Parser`.
- */
-export const dictionaryParser = dictionaryParserOf(parser, parser);
-
-
-ref.parser = ptag(choice<SExpression>(
-  atomParser,
-  listParser,
-  dictionaryParser
-));
-
-
-const label = plabel('s-expression');
   
 /**
  * Monalisp `SExpression` `Parser`.
  */
-export const sExpressionParser = label(parser);
+export const sExprParser = plabel('s-expression', parser);
