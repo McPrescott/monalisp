@@ -3,14 +3,14 @@
 //------------------------------------------------------------------------------
 
 
-import {ParseFailure, Parser, run, plabel} from './parse/parser';
+import {ParseFailure, Parser, run} from './parse/parser';
 import {macroTable} from './macros/table';
 
 
 /**
  * Monalisp reader macro `Parser`.
  */
-export const macroParser = Parser.of((stream) => {
+export const macroParser: ParserType<ReaderForm> = Parser.of((stream) => {
   if (stream.peek() in macroTable) {
     return run(macroTable[stream.next()], stream);
   }

@@ -11,23 +11,23 @@ import {ptag} from './tagging';
 import {atomParser} from './atom';
 import {listParserOf} from './list';
 import {dictionaryParserOf} from './dictionary';
-import {sExprParser, sExprParserRef, SExpression} from './s-expression';
+import {readerFormParser, readerFormParserRef} from './s-expression';
 import {macroParser} from './macro';
 
 
 /**
  * Monalisp `List` `Parser`.
  */
-export const listParser = listParserOf(sExprParser);
+export const listParser = listParserOf(readerFormParser);
 
 
 /**
  * Monalisp `Dictionary` `Parser`.
  */
-export const dictionaryParser = dictionaryParserOf(sExprParser, sExprParser);
+export const dictionaryParser = dictionaryParserOf(readerFormParser, readerFormParser);
 
 
-sExprParserRef.parser = ptag(choice<SExpression>(
+readerFormParserRef.parser = ptag(choice<ReaderForm>(
   macroParser,
   atomParser,
   listParser,
@@ -38,7 +38,7 @@ sExprParserRef.parser = ptag(choice<SExpression>(
 /**
  * Complete Monalisp `Parser`.
  */
-const monalispParser = completion(surround(sExprParser, anySpace));
+const monalispParser = completion(surround(readerFormParser, anySpace));
 
 
 /**

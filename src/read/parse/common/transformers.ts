@@ -16,7 +16,7 @@ export const toInt = (string: string, base?: number) => (
 /**
  * Parse hexadecimal string into number.
  */
-export const hexStringToNumber = (hexString: string) => (
+export const hexToNumber = (hexString: string) => (
   Number.parseInt(hexString, 16)
 );
 
@@ -24,7 +24,7 @@ export const hexStringToNumber = (hexString: string) => (
 /**
  * Parse octal string into number.
  */
-export const octalStringToNumber = (octalString: string) => (
+export const octalToNumber = (octalString: string) => (
   Number.parseInt(octalString, 8)
 );
 
@@ -32,7 +32,7 @@ export const octalStringToNumber = (octalString: string) => (
 /**
  * Parse octal string into number.
  */
-export const binaryStringToNumber = (binaryString: string) => (
+export const binaryToNumber = (binaryString: string) => (
   Number.parseInt(binaryString, 2)
 );
 
@@ -48,7 +48,7 @@ export const toFloat = (number: string) => (
 /**
  * Return string representation of given *object*.
  */
-export const toString = (object) => object.toString();
+export const toString = (object: any) => object.toString();
 
 
 /**

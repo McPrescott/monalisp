@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {Parser, Result, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from '../parser';
+import {Parser, labelledParser, didParseFail, didParseSucceed, success, pmap, run, ParseFailure} from '../parser';
 import {joinFlat} from '../common/transformers';
 
 
@@ -12,10 +12,10 @@ import {joinFlat} from '../common/transformers';
  * results.
  */
 export const seq = (
-  <T>(...parsers: Parser<T>[]): Parser<T[]> => (
+  <T>(...parsers: ParserType<T>[]): ParserType<T[]> => (
     labelledParser((stream) => {
       const parsed = [];
-      let result: Result;
+      let result: ParseResultType;
       for (const parser of parsers) {
         result = parser.run(stream);
         if (didParseFail(result))
@@ -33,7 +33,7 @@ export const seq = (
  * the results.
  */
 export const pair = (
-  <A, B>(first: Parser<A>, second: Parser<B>): Parser<[A, B]> => (
+  <A, B>(first: ParserType<A>, second: ParserType<B>): ParserType<[A, B]> => (
     Parser.of((stream) => {
       const firstResult = run(first, stream);
       if (didParseFail(firstResult))
@@ -52,8 +52,8 @@ export const pair = (
  * *third*] of the results.
  */
 export const triple = (
-  <A, B, C>(first: Parser<A>, second: Parser<B>, third: Parser<C>):
-  Parser<[A, B, C]> => (
+  <A, B, C>(first: ParserType<A>, second: ParserType<B>, third: ParserType<C>):
+  ParserType<[A, B, C]> => (
     Parser.of((stream) => {
       const firstResult = run(first, stream);
       if (didParseFail(firstResult))
@@ -74,7 +74,7 @@ export const triple = (
  * Return `Parser` that runs provided *parser*, but returns placeholder
  * `ParseSuccess` upon success.
  */
-export const skip = <T>(parser: Parser<T>, label?: string) => (
+export const skip = <T>(parser: ParserType<T>, label?: string): ParserType<ParseSuccessType> => (
   labelledParser((stream) => {
     const result = parser.run(stream);
     return (didParseFail(result)) ? result : success;
@@ -87,10 +87,10 @@ export const skip = <T>(parser: Parser<T>, label?: string) => (
  * possible. The returned `Parser` can never fail, if the first parsing attempt
  * fails the empty list is returned.
  */
-export const star = <T>(parser: Parser<T>, label?: string): Parser<T[]> => (
+export const star = <T>(parser: ParserType<T>, label?: string): ParserType<T[]> => (
   labelledParser((stream) => {
     const results = [];
-    let currentResult: Result<T>;
+    let currentResult: ParseResultType<T>;
     while (didParseSucceed(currentResult = parser.run(stream))) {
       results.push(currentResult);
     }
@@ -103,7 +103,7 @@ export const star = <T>(parser: Parser<T>, label?: string): Parser<T[]> => (
  * Returns `Parser` that runs given *parser* repeatedly until failure. If
  * parsing fails on the first attempt the `ParseFailure` is returned.
  */
-export const plus = <T>(parser: Parser<T>, label?: string) => (
+export const plus = <T>(parser: ParserType<T>, label?: string): ParserType<T[]> => (
   labelledParser((stream) => {
     let result = parser.run(stream);
     if (didParseFail(result))
@@ -121,7 +121,7 @@ export const plus = <T>(parser: Parser<T>, label?: string) => (
  * Returns `Parser` that runs given *parser* once. When parse is successful the
  * result is returned, otherwise `ParseSuccess` is returned.
  */
-export const opt = <T>(parser: Parser<T>, label?: string) => (
+export const opt = <T>(parser: ParserType<T>, label?: string) => (
   labelledParser((stream) => {
     const result = parser.run(stream);
     return (didParseSucceed(result)) ? result : success;
@@ -133,9 +133,9 @@ export const opt = <T>(parser: Parser<T>, label?: string) => (
  * Return `Parser` that sequentially attempts to given *parsers*, returning the
  * result of the first successful parse, or the result of the last failure.
  */
-export const choice = <T>(...parsers: Parser<T>[]) => (
+export const choice = <T>(...parsers: ParserType<T>[]): ParserType<T> => (
   labelledParser((stream) => {
-    let current: Result<T>;
+    let current: ParseResultType<T>;
     for (const parser of parsers) {
       current = parser.run(stream);
       if (didParseSucceed(current))
@@ -150,7 +150,7 @@ export const choice = <T>(...parsers: Parser<T>[]) => (
  * Return `Parser` that runs both *before* and *after* respectively, returning
  * only the result of *after* upon success.
  */
-export const after = <T>(before: Parser, after: Parser<T>) => (
+export const after = <T>(before: ParserType, after: ParserType<T>) => (
   Parser.of((stream) => {
     const beforeResult = run(before, stream);
     if (didParseFail(beforeResult))
@@ -164,7 +164,7 @@ export const after = <T>(before: Parser, after: Parser<T>) => (
  * Return `Parser` that runs both *before* and *after* respectively, returning
  * only the result of *before* upon success.
  */
-export const before = <T>(before: Parser<T>, after: Parser) => (
+export const before = <T>(before: ParserType<T>, after: ParserType): ParserType<T> => (
   Parser.of((stream) => {
     const result = run(before, stream);
     if (didParseFail(result))
@@ -182,7 +182,7 @@ export const before = <T>(before: Parser<T>, after: Parser) => (
  * provided, returning only the result of *mid* on success.
  */
 export const between = (
-  <T>(pre: Parser, mid: Parser<T>, post: Parser): Parser<T> => (
+  <T>(pre: ParserType, mid: ParserType<T>, post: ParserType): ParserType<T> => (
     Parser.of((stream) => {
       const preResult = run(pre, stream);
       if (didParseFail(preResult))
@@ -203,7 +203,7 @@ export const between = (
  * Return `Parser` that runs *surround* before and after given *parser*,
  * returning only the result of *parser* upon successful completion.
  */
-export const surround = <T>(parser: Parser<T>, surround: Parser) => (
+export const surround = <T>(parser: ParserType<T>, surround: ParserType): ParserType<T> => (
   between(surround, parser, surround)
 );
 
@@ -214,11 +214,11 @@ export const surround = <T>(parser: Parser<T>, surround: Parser) => (
  * failure occurs on the first parsing attempt, the empty list is returned.
  */
 export const series = (
-  <T>(element: Parser<T>, separator: Parser): Parser<T[]> => (
+  <T>(element: ParserType<T>, separator: ParserType): ParserType<T[]> => (
     Parser.of((stream) => {
       const elements = [];
       const sepElement = after(separator, element);
-      let result: Result<T> = run(element, stream);
+      let result: ParseResultType<T> = run(element, stream);
       while (didParseSucceed(result)) {
         elements.push(result);
         result = run(sepElement, stream);
@@ -235,11 +235,11 @@ export const series = (
  * parse fails.
  */
 export const minSeries = (
-  <T>(element: Parser<T>, separator: Parser, min=1) => (
+  <T>(element: ParserType<T>, separator: ParserType, min=1): ParserType<T[]> => (
     Parser.of((stream) => {
       const elements = [];
       const sepElement = after(separator, element);
-      let result: Result<T> = run(element, stream);
+      let result: ParseResultType<T> = run(element, stream);
       while (didParseSucceed(result)) {
         elements.push(result);
         result = run(sepElement, stream);
@@ -258,11 +258,11 @@ export const minSeries = (
  * the parse fails.
  */
 export const maxSeries = (
-  <T>(element: Parser<T>, separator: Parser, max=Infinity) => (
+  <T>(element: ParserType<T>, separator: ParserType, max=Infinity): ParserType<T[]> => (
     Parser.of((stream) => {
       const elements = [];
       const sepElement = after(separator, element);
-      let result: Result<T> = run(element, stream);
+      let result: ParseResultType<T> = run(element, stream);
       while (didParseSucceed(result)) {
         if (elements.push(result) > max)
           break;
@@ -285,7 +285,7 @@ export const maxSeries = (
  * Return `Parser` that run given *parser* normally, except that upon failure
  * the position of the `CharStream` is reset.
  */
-export const attempt = <T>(parser: Parser<T>, label?: string) => (
+export const attempt = <T>(parser: ParserType<T>, label?: string): ParserType<T> => (
   labelledParser((stream) => {
     stream.save();
     const result = parser.run(stream);
@@ -300,11 +300,11 @@ export const attempt = <T>(parser: Parser<T>, label?: string) => (
  * `CharStream`, or until `ParseFailure`. Upon success a list of each parsed
  * value is returned; upon failure, the `ParseFailure` is returned immediately.
  */
-export const completion = <T>(parser: Parser<T>) => (
+export const completion = <T>(parser: ParserType<T>): ParserType<T[]> => (
   Parser.of((stream) => {
     const results: T[] = [];
-    let result: Result<T>;
-    while (!stream.isDone()) {
+    let result: ParseResultType<T>;
+    while (!stream.isDone) {
       result = run(parser, stream);
       if (didParseFail(result))
         return result;
@@ -318,7 +318,7 @@ export const completion = <T>(parser: Parser<T>) => (
 /**
  * Join list contained in *parser* into a string.
  */
-export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
+export const pjoin = <T>(parser: ParserType<T[]>, sep=""): ParserType<string> => (
   parser.map((parsed) => parsed.join(sep))
 );
 
@@ -326,7 +326,7 @@ export const pjoin = <T>(parser: Parser<T[]>, sep="") => (
 /**
  * Flatten and join nested lists contained in *parser* into a string.
  */
-export const pjoinFlat = <T>(parser: Parser<T[]>, sep="") => (
+export const pjoinFlat = <T>(parser: ParserType<T[]>, sep=""): ParserType<string> => (
   parser.map((parsed) => joinFlat(parsed, sep))
 );
 
@@ -334,7 +334,7 @@ export const pjoinFlat = <T>(parser: Parser<T[]>, sep="") => (
 /**
  * Replaces the successfully parsed value of *parser* with *value*.
  */
-export const setParsed = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
+export const setParsed = <A, B>(parser: ParserType<A>, value: B): ParserType<B> => (
   pmap((_) => value, parser)
 );
 
@@ -347,7 +347,7 @@ export const setParsed = <A, B>(parser: Parser<A>, value: B): Parser<B> => (
 export const fref = <T=any>(): ParserReferencePair<T> => {
   const ref: ParserReference<T> = {
     //@ts-ignore
-    parser: <Parser<T>> Parser.of((stream) => (
+    parser: <ParserType<T>> Parser.of((stream) => (
       ParseFailure.of(
         `Forward reference has not been replaced.`,
         'unknown',
@@ -360,8 +360,8 @@ export const fref = <T=any>(): ParserReferencePair<T> => {
   return [ref, wrapper];
 }
 
-export type ParserReferencePair<T=any> = [ParserReference<T>, Parser<T>];
+export type ParserReferencePair<T=any> = [ParserReference<T>, ParserType<T>];
 
 export interface ParserReference<T=any> {
-  parser: Parser<T>;
+  parser: ParserType<T>;
 };

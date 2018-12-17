@@ -6,24 +6,7 @@
 import {NL, EMPTY} from './common/chars';
 
 
-export namespace CharStream {
-
-  export type State = {
-    pos: number;
-    line: number;
-    column: number;
-  };
-
-  export type Info = {
-    lineText: string;
-    line: number;
-    column: number;
-  };
-}
-
-
-
-export class CharStream {
+export class CharStream implements CharStreamType {
 
   /**
    * Static constructor of `CharStream`.
@@ -84,14 +67,14 @@ export class CharStream {
   /**
    * Check whether all characters have been streamed.
    */
-  isDone() {
+  get isDone(): boolean {
     return this.pos >= this.length;
   }
 
   /**
    * Return current character, updating internal state.
    */
-  next() {
+  next(): string {
     if (this.pos >= this.length)
       return EMPTY;
     const char = this.source[this.pos++];
@@ -108,7 +91,7 @@ export class CharStream {
   /**
    * Return current character without state change.
    */
-  peek() {
+  peek(): string {
     if (this.pos >= this.length)
       return EMPTY;
     return this.source[this.pos];
@@ -117,7 +100,7 @@ export class CharStream {
   /**
    * Update internal state.
    */
-  skip() {
+  skip(): void {
     if (this.pos >= this.length)
       return;
     const char = this.source[this.pos];
@@ -134,14 +117,14 @@ export class CharStream {
   /**
    * Save current state.
    */
-  save() {
+  save(): void {
     this.stateStack.push(this.state);
   }
 
   /**
    * Restore to most recently saved state.
    */
-  restore() {
+  restore(): void {
     const state = this.stateStack.pop();
     this.pos = state.pos;
     this.line = state.line;
@@ -151,7 +134,7 @@ export class CharStream {
   /**
    * Remove most recently saved state without updating internal state.
    */
-  unsave() {
+  unsave(): void {
     this.stateStack.pop();
   }
 }

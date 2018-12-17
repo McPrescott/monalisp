@@ -10,7 +10,7 @@
 			"path": "/jmcp/docs"
 		},
 		{
-			"path": "/jmcp/log"
+			"path": "/jmcp/dev/javascript/lib/typings"
 		}
 	],
 	"settings": {}

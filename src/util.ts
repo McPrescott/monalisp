@@ -4,10 +4,10 @@
 
 
 import {curry} from './~hyfns/index';
-import {Keyword} from './builtin/keyword';
-import {Identifier} from './builtin/identifier';
+import {Keyword} from './common/keyword';
+import {Identifier} from './common/identifier';
 import {ParseFailure} from './read/parse/parser';
-import { Tagged } from './read/tagging';
+import {ReaderTag} from './read/tagging';
 
 
 // -- Builtin Extensions -------------------------------------------------------
@@ -71,8 +71,8 @@ export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
 export const quote = (str: string) => `"${str}"`;
 
 
-const mapArgs = (arg): string => {
-  if (arg instanceof Tagged) {
+const mapArgs = (arg: any): string => {
+  if (arg instanceof ReaderTag) {
     return mapArgs(arg.expression);
   }
   else if (Array.isArray(arg)) {
@@ -109,7 +109,7 @@ const mapArgs = (arg): string => {
 };
 
 
-export const log = (...args) => {
+export const log = (...args: any[]) => {
   let transformed = args.map(mapArgs);
   console.log(...transformed);
 };

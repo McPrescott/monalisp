@@ -7,9 +7,9 @@ import {pipe} from '../../../~hyfns/index';
 import {MINUS, DOT} from '../common/chars';
 import {Regex} from '../common/regex';
 import {isDigit, matches} from '../common/predicates';
-import {toInt, join, toFloat, hexStringToNumber, octalStringToNumber, binaryStringToNumber} from '../common/transformers';
-import {satisfy, pchar} from './string';
+import {toInt, join, toFloat, hexToNumber, octalToNumber, binaryToNumber} from '../common/transformers';
 import {plus, seq, opt, pjoin} from './combinators';
+import {satisfy, pchar} from './string';
 
 
 const parseMinus = pchar(MINUS);
@@ -82,7 +82,7 @@ export const parseFloat = (
  * `Parser` for hexadecimal number with optional sign.
  */
 export const parseHex = (
-  seq(opt(parseMinus), parseHexDigits).map(pipe(join, hexStringToNumber))
+  seq(opt(parseMinus), parseHexDigits).map(pipe(join, hexToNumber))
 );
 
 
@@ -90,7 +90,7 @@ export const parseHex = (
  * `Parser` for octal number with optional sign.
  */
 export const parseOctal = (
-  seq(opt(parseMinus), parseOctalDigits).map(pipe(join, octalStringToNumber))
+  seq(opt(parseMinus), parseOctalDigits).map(pipe(join, octalToNumber))
 );
 
 
@@ -98,5 +98,5 @@ export const parseOctal = (
  * `Parser` for binary number with optional sign.
  */
 export const parseBinary = (
-  seq(opt(parseMinus), parseBinaryDigits).map(pipe(join, binaryStringToNumber))
+  seq(opt(parseMinus), parseBinaryDigits).map(pipe(join, binaryToNumber))
 );

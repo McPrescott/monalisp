@@ -3,11 +3,10 @@
 //------------------------------------------------------------------------------
 
 
-import {CharStream} from '../parse/char-stream';
 import {Parser, run, didParseFail} from '../parse/parser';
-import {Tagged, ParseType} from '../tagging';
+import {ReaderTag, ReaderFormFlag} from '../tagging';
 import {getIdentifier} from '../identifier';
-import {sExprParser, SExpression} from '../s-expression';
+import {readerFormParser} from '../s-expression';
 
 
 /**
@@ -15,15 +14,15 @@ import {sExprParser, SExpression} from '../s-expression';
  */
 const taggedQuote = (info: CharStream.Info) => {
   const id = getIdentifier('quote')
-  return Tagged.fromExpanded(id, ParseType.Identifier, info);
+  return ReaderTag.fromExpanded(id, ReaderFormFlag.Identifier, info);
 }
 
 
 /**
  * Monalisp's quote macro (`'`).
  */
-export const quoteMacro: Parser<SExpression> = Parser.of((stream) => {
-  const expression = run(sExprParser, stream);
+export const quoteMacro: ParserType<ReaderForm> = Parser.of((stream) => {
+  const expression = run(readerFormParser, stream);
   if (didParseFail(expression))
     return expression;
   return [taggedQuote(stream.info), expression];

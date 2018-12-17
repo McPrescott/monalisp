@@ -3,23 +3,59 @@
 //------------------------------------------------------------------------------
 
 
-export class IDTable {
-  private table: Map<string, any> = new Map();
+/**
+ * Return list where `Identifier` is replaced with its name property in each
+ * tuple.
+ */
+const nameOfIDs = (
+  (entries: Iterable<[IdentifierType, EvalForm]>): [string, EvalForm][] => {
+    let result = [];
+    for (const entry of entries) {
+      result.push([entry[0].name, entry[1]]);
+    }
+    return result;
+  }
+);
 
-  static create() {
-    return new IDTable();
+
+
+/**
+ * Table of stored variables.
+ */
+export class VarTable implements VarTableType {
+
+  /**
+   * Static factory function of `VarTable`.
+   */
+  static of(entries?: Iterable<[IdentifierType, EvalForm]>): VarTableType {
+    return new VarTable(entries);
   }
 
-  isRegistered(id: Identifier): boolean {
-    return this.table.has(id.name);
+  private table: Map<string, EvalForm>;
+  
+  constructor(entries?: Iterable<[IdentifierType, EvalForm]>) {
+    this.table = (entries) ? new Map(nameOfIDs(entries)) : new Map();
   }
 
-  resolve(id: Identifier): any {
+  /**
+   * Resolve value of given *id*.
+   */
+  resolve(id: IdentifierType): EvalForm {
     return this.table.get(id.name);
   }
 
-  register(id: Identifier, value: any): any {
+  /**
+   * Set the value of *id* to *value*.
+   */
+  define(id: IdentifierType, value: EvalForm): EvalForm {
     this.table.set(id.name, value);
     return value;
+  }
+
+  /**
+   * Return whether *id* is defined.
+   */
+  isDefined(id: IdentifierType): boolean {
+    return this.table.has(id.name);
   }
 }

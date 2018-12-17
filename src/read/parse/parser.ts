@@ -4,28 +4,14 @@
 
 
 import {curry} from '../../~hyfns/index';
-import {CharStream} from './char-stream';
 import {SPACE} from './common/chars';
-
-
-
-/**
- * Parse function signature of `Parser`.
- */
-export type ParseFn<T=any> = (stream: CharStream) => Result<T>;
-
-
-/**
- * Result of `ParseFn`.
- */
-export type Result<T=any> = T | ParseFailure;
 
 
 /**
  * Parse success, typically used as a placeholder for parsers that throw away
  * values.
  */
-export class ParseSuccess {
+export class ParseSuccess implements ParseSuccessType {
   toString() {
     return '';
   }
@@ -37,7 +23,7 @@ export const success = new ParseSuccess();
 /**
  * Parsing failure type.
  */
-export class ParseFailure {
+export class ParseFailure implements ParseFailureType {
 
   /**
    * Static constructor of `ParseFailure`.
@@ -71,28 +57,28 @@ export class ParseFailure {
 /**
  * Type wrapper around a parser function.
  */
-export class Parser<T=any> {
+export class Parser<T=any> implements ParserType<T> {
 
   /**
    * Return `Parser` that ignores given *stream* and returns given *value*.
    */
-  static return<T>(value: T): Parser<T> {
+  static return<T>(value: T): ParserType<T> {
     return Parser.of((stream) => value);
   }
 
   /**
    * Static constructor function.
    */
-  static of<T>(run: ParseFn<T>, label?: string): Parser<T> {
+  static of<T>(run: ParseFunctionType<T>, label?: string): ParserType<T> {
     return new Parser(run, label);
   }
 
-  constructor(public run: ParseFn<T>, public label?: string) {};
+  constructor(public run: ParseFunctionType<T>, public label?: string) {};
 
   /**
    * Return wrapping `Parser` that maps *fn* over successfully parsed value.
    */
-  map<R>(fn: (parsed: T) => R): Parser<R> {
+  map<U>(fn: (parsed: T) => U): ParserType<U> {
     return Parser.of((stream) => {
       const result = run(this, stream);
       return (didParseFail(result)) ? result : fn(result);
@@ -103,18 +89,18 @@ export class Parser<T=any> {
    * Return `Parser` that applies the successful result of *parser* to the
    * successful result of *this*.
    */
-  apply<A>(parser: Parser<A>): Parser<T extends (a: A) => infer B ? B : null> {
-    return Parser.of((stream) => {
-      const thisResult = run(this, stream);
-      if (didParseFail(thisResult))
-        return thisResult;
-      const parserResult = run(parser, stream);
-      return (didParseFail(parserResult)
-        ? parserResult
-        // @ts-ignore
-        : thisResult(parserResult));
-    });
-  }
+  // apply<A>(parser: IParser<A>): IParser<T extends (a: A) => infer B ? B : null> {
+  //   return Parser.of((stream) => {
+  //     const thisResult = run(this, stream);
+  //     if (didParseFail(thisResult))
+  //       return thisResult;
+  //     const parserResult = run(parser, stream);
+  //     return (didParseFail(parserResult)
+  //       ? parserResult
+  //       // @ts-ignore
+  //       : thisResult(parserResult));
+  //   });
+  // }
 }
 
 
@@ -126,7 +112,7 @@ export class Parser<T=any> {
 /**
  * Test if given argument extends `ParseFailure`.
  */
-export const didParseFail = <T>(result: Result<T>): result is ParseFailure => (
+export const didParseFail = <T>(result: ParseResultType<T>): result is ParseFailureType => (
   result instanceof ParseFailure
 );
 
@@ -134,7 +120,7 @@ export const didParseFail = <T>(result: Result<T>): result is ParseFailure => (
 /**
  * Test if given argument does not extend `ParseFailure`.
  */
-export const didParseSucceed = <T>(result: Result<T>): result is T => (
+export const didParseSucceed = <T>(result: ParseResultType<T>): result is T => (
   !(result instanceof ParseFailure)
 );
 
@@ -142,20 +128,20 @@ export const didParseSucceed = <T>(result: Result<T>): result is T => (
 /**
  * Run *parser* with given *stream*.
  */
-export const run: Run = curry((parser: Parser, stream: CharStream) => (
+export const run: Run = curry((parser: ParserType, stream: CharStreamType) => (
   parser.run(stream)
 ));
 
 interface Run {
-  <T>(parser: Parser<T>): (stream: CharStream) => Result<T>;
-  <T>(parser: Parser<T>, stream: CharStream): Result<T>;
+  <T>(parser: ParserType<T>): (stream: CharStreamType) => ParseResultType<T>;
+  <T>(parser: ParserType<T>, stream: CharStreamType): ParseResultType<T>;
 }
 
 
 /**
  * Return `Parser` that always returns *returnValue*.
  */
-export const preturn = <T>(returnValue: T): Parser<T> => (
+export const preturn = <T>(returnValue: T): ParserType<T> => (
   Parser.return(returnValue)
 );
 
@@ -165,13 +151,13 @@ export const preturn = <T>(returnValue: T): Parser<T> => (
  *
  * `pmap :: (A -> B) -> Parser<A> -> Parser<B>`
  */
-export const pmap: PMap = curry((fn: Unary, parser: Parser) => (
+export const pmap: PMap = curry((fn: Unary, parser: ParserType) => (
   parser.map(fn)
 ));
 
 interface PMap {
-  <A, B>(fn: (x: A) => B, parser: Parser<A>): Parser<B>;
-  <A, B>(fn: (x: A) => B): (parser: Parser<A>) => Parser<B>;
+  <A, B>(fn: (parsed: A) => B, parser: ParserType<A>): ParserType<B>;
+  <A, B>(fn: (parsed: A) => B): (parser: ParserType<A>) => ParserType<B>;
 }
 
 
@@ -181,7 +167,7 @@ interface PMap {
  * `papply :: Parser<a -> b> -> Parser<a> -> Parser<b>`
  */
 export const papply: PApply = curry(
-  <A, B>(parser: Parser<(parsed: A) => B>, parsed: Parser<A>) => (
+  <A, B>(parser: ParserType<(parsed: A) => B>, parsed: ParserType<A>) => (
     Parser.of((stream) => {
       const parserResult = run(parser, stream);
       if (didParseFail(parserResult))
@@ -195,8 +181,8 @@ export const papply: PApply = curry(
 );
 
 interface PApply {
-  <A, B>(parser: Parser<(parsed: A) => B>, parsed: Parser<A>): Parser<B>;
-  <A, B>(parser: Parser<(parsed: A) => B>): (parsed: Parser<A>) => Parser<B>;
+  <A, B>(parser: ParserType<(parsed: A) => B>, parsed: ParserType<A>): ParserType<B>;
+  <A, B>(parser: ParserType<(parsed: A) => B>): (parsed: ParserType<A>) => ParserType<B>;
 }
 
 
@@ -206,7 +192,7 @@ interface PApply {
  * `pbind :: (A -> Parser<B>) -> Parser<A> -> Parser<B>`
  */
 export const pbind: PBind = (
-  curry((fn: (p: any) => Parser, parser: Parser) => (
+  curry((fn: (p: any) => ParserType, parser: ParserType) => (
     Parser.of((stream) => {
       let parserResult = run(parser, stream);
       if (didParseFail(parserResult))
@@ -217,15 +203,15 @@ export const pbind: PBind = (
 );
 
 interface PBind {
-  <A, B>(producer: (parsed: A) => Parser<B>, parser: Parser<A>): Parser<B>;
-  <A, B>(producer: (parsed: A) => Parser<B>): (parser: Parser<A>) => Parser<B>;
+  <A, B>(producer: (parsed: A) => ParserType<B>, parser: ParserType<A>): ParserType<B>;
+  <A, B>(producer: (parsed: A) => ParserType<B>): (parser: ParserType<A>) => ParserType<B>;
 }
 
 
 /**
  * Return new `Parser` with given *label*.
  */
-export const plabel: PLabel = curry((label: string, parser: Parser) => (
+export const plabel: PLabel = curry((label: string, parser: ParserType) => (
   Parser.of((stream) => {
     let result = run(parser, stream);
     if (didParseFail(result))
@@ -235,15 +221,15 @@ export const plabel: PLabel = curry((label: string, parser: Parser) => (
 ));
 
 interface PLabel {
-  <T>(label: string, parser: Parser<T>): Parser<T>;
-  (label: string): <T>(parser: Parser<T>) => Parser<T>;
+  <T>(label: string, parser: ParserType<T>): ParserType<T>;
+  (label: string): <T>(parser: ParserType<T>) => ParserType<T>;
 }
 
 
 /**
  * Create `Parser` with given *parseFn* and *label*.
  */
-export const labelledParser = <T>(parseFn: ParseFn<T>, label: string) => (
+export const labelledParser = <T>(parseFn: ParseFunctionType<T>, label: string) => (
   Parser.of((stream) => {
     let result = parseFn(stream);
     if (didParseFail(result))
@@ -258,7 +244,7 @@ export const labelledParser = <T>(parseFn: ParseFn<T>, label: string) => (
  * parsed values are passed through unmodified.
  */
 export const perror: PError = curry(
-  <T>(fn: (failure: ParseFailure) => ParseFailure, parser: Parser<T>) => (
+  <T>(fn: (failure: ParseFailureType) => ParseFailureType, parser: ParserType<T>) => (
     Parser.of((stream) => {
       const result = run(parser, stream);
       if (didParseFail(result))
@@ -269,8 +255,8 @@ export const perror: PError = curry(
 );
 
 interface PError {
-  <T>(fn: (failure: ParseFailure) => ParseFailure, parser: Parser<T>):
-    Parser<T>;
-  (fn: (failure: ParseFailure) => ParseFailure):
-    <T>(parser: Parser<T>) => Parser<T>;
+  <T>(fn: (failure: ParseFailureType) => ParseFailureType, parser: ParserType<T>):
+    ParserType<T>;
+  (fn: (failure: ParseFailureType) => ParseFailureType):
+    <T>(parser: ParserType<T>) => ParserType<T>;
 }
