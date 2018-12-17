@@ -3,18 +3,36 @@
 //------------------------------------------------------------------------------
 
 
-interface VarTableConstructor {
-  of(entries: Iterable<[IdentifierType, EvalForm]>): VarTableType;
-  new(entries: Iterable<[IdentifierType, EvalForm]>): VarTableType;
-  readonly prototype: VarTableType;
+interface ScopeConstructor {
+  of(entries: Iterable<[IdentifierType, EvalForm]>): ScopeType;
+  new(entries: Iterable<[IdentifierType, EvalForm]>): ScopeType;
+  readonly prototype: ScopeType;
 }
 
 
-interface VarTableType {
+interface ScopeType {
   resolve(id: IdentifierType): EvalForm;
   define(id: IdentifierType, value: EvalForm): EvalForm;
   isDefined(id: IdentifierType): boolean;
 }
+
+
+interface ScopeStackConstructor {
+  of(scopes: Iterable<ScopeType>): ScopeStackType;
+  new(scopes: Iterable<ScopeType>): ScopeStackType;
+  readonly prototype: ScopeStackType;
+}
+
+
+interface ScopeStackType extends Iterable<ScopeType> {
+  push(...scopes: ScopeType[]): ScopeStackType;
+  pop(): ScopeStackType;
+  resolve(id: IdentifierType): EvalForm;
+  define(id: IdentifierType, value: EvalForm): EvalForm;
+  isDefined(id: IdentifierType): boolean;
+}
+
+
 
 
 /**
