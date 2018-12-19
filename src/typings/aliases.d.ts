@@ -30,3 +30,6 @@ type ArgsOf<T extends AnyFn> = T extends ((...x: infer A) => any) ? A : never;
 type ReturnOf<T extends AnyFn> = (
   T extends ((...x: any[]) => (infer R)) ? R : never
 );
+
+
+type ArrayType<T extends any[]> = T extends (infer U)[] ? U : never;

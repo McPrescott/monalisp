@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {last} from '../~hyfns/last';
+import {last} from '../~hyfns/list';
 
 
 /**
@@ -28,36 +28,26 @@ const nameOfIDs = (
 export class Scope implements ScopeType {
 
   /**
-   * Static factory function of `VarTable`.
+   * Static factory function of `Scope`.
    */
   static of(entries?: Iterable<[IdentifierType, EvalForm]>): ScopeType {
     return new Scope(entries);
   }
 
   private table: Map<string, EvalForm>;
-  
   constructor(entries?: Iterable<[IdentifierType, EvalForm]>) {
     this.table = (entries) ? new Map(nameOfIDs(entries)) : new Map();
   }
 
-  /**
-   * Resolve value of given *id*.
-   */
   resolve(id: IdentifierType): EvalForm {
     return this.table.get(id.name);
   }
 
-  /**
-   * Set the value of *id* to *value*.
-   */
   define(id: IdentifierType, value: EvalForm): EvalForm {
     this.table.set(id.name, value);
     return value;
   }
 
-  /**
-   * Return whether *id* is defined.
-   */
   isDefined(id: IdentifierType): boolean {
     return this.table.has(id.name);
   }
@@ -66,10 +56,13 @@ export class Scope implements ScopeType {
 
 
 /**
- * Stack of `VarTable` instances, each representing a single scope.
+ * Stack of `Scope` instances, each representing a single scope.
  */
 export class ScopeStack implements ScopeStackType {
 
+  /**
+   * Static factory function of `ScopeStack`.
+   */
   static of(stack: Iterable<ScopeType>): ScopeStackType {
     return new ScopeStack(stack);
   }

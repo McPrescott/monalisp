@@ -9,8 +9,8 @@ import {toInt} from '../parse/common/transformers';
 import {Parser, run, pmap, didParseFail, ParseFailure} from '../parse/parser';
 import {after, attempt, choice} from '../parse/parsers/combinators';
 import {pchar, satisfyRegex} from '../parse/parsers/string';
+import {getIdentifier} from '../../common/identifier';
 import {ReaderTag, ReaderFormFlag} from '../tagging';
-import {getIdentifier} from '../identifier';
 import {listParserOf} from '../list';
 import {readerFormParser} from '../s-expression';
 

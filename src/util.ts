@@ -35,26 +35,6 @@ import {ReaderTag} from './read/tagging';
 
 
 
-// -- Array Functions ----------------------------------------------------------
-
-
-/**
- * Return the first element of *list*.
- */
-export const head = <T>(list: T[]): T => (
-  list[0]
-);
-
-
-/**
- * Return new `Array` containing all but the first element of *list*.
- */
-export const tail = <T>(list: T[]): T[] => (
-  list.filter((_, i) => i !== 0)
-);
-
-
-
 
 // -- Misc Functions -----------------------------------------------------------
 
@@ -71,12 +51,12 @@ export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
 export const quote = (str: string) => `"${str}"`;
 
 
-const mapArgs = (arg: any): string => {
+export const pprint = (arg: any): string => {
   if (arg instanceof ReaderTag) {
-    return mapArgs(arg.expression);
+    return pprint(arg.expression);
   }
   else if (Array.isArray(arg)) {
-    return `(${arg.map(mapArgs).join(' ')})`;
+    return `(${arg.map(pprint).join(' ')})`;
   }
   else if (typeof arg === 'string') {
     return (arg.startsWith('! '))
@@ -96,7 +76,7 @@ const mapArgs = (arg: any): string => {
     let str = String.empty();
     let i = 0;
     for (const pair of arg) {
-      str += pair.map(mapArgs).join(' => ');
+      str += pair.map(pprint).join(' => ');
       if (++i < arg.size)
         str += ', ';
     }
@@ -110,6 +90,6 @@ const mapArgs = (arg: any): string => {
 
 
 export const log = (...args: any[]) => {
-  let transformed = args.map(mapArgs);
+  let transformed = args.map(pprint);
   console.log(...transformed);
 };

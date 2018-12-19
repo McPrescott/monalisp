@@ -4,8 +4,8 @@
 
 
 import {Parser, run, didParseFail} from '../parse/parser';
+import {getIdentifier} from '../../common/identifier';
 import {ReaderTag, ReaderFormFlag} from '../tagging';
-import {getIdentifier} from '../identifier';
 import {readerFormParser} from '../s-expression';
 
 
