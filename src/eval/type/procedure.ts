@@ -7,26 +7,7 @@ import {last, zip} from '../../~hyfns/list';
 import {Callable} from './callable';
 import {Scope} from './scope';
 import {EvalFailure, didEvalFail} from '../eval-failure';
-import {evaluate} from '../evaluator';
-
-
-/**
- * Evaluates *sequence* of reader forms, returning `EvalFailure` immediately
- * upon failure, or an `EvalForm[]` upon success.
- */
-const evaluateSequence = (
-  (scope: ScopeStackType, sequence: TaggedReaderForm[]) => {
-    const results: EvalForm[] = [];
-    for (const form of sequence) {
-      const result = evaluate(scope, form);
-      if (didEvalFail(result))
-        return result;
-      results.push(result);
-    }
-    return results;
-  }
-);
-
+import {evaluateSequence} from '../evaluator';
 
 
 /**

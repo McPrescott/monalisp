@@ -63,7 +63,7 @@ export class Signature {
         const {info} = parameter;
         const expectedType = formFlagName(type);
         const givenType = formFlagName(parameter.type);
-        const message = `Incorrect type for ${name} parameter. Expected` 
+        const message = `Incorrect type for "${name}" parameter. Expected` 
                       + `${expectedType}, got ${givenType}.`;
         return EvalFailure.of(message, info);
       }

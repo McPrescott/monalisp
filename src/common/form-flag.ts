@@ -3,8 +3,12 @@
 //------------------------------------------------------------------------------
 
 
+import {Identifier} from './identifier';
+import {Keyword} from './keyword';
+
+
 /**
- * Enumeration of possible `SExpression` types.
+ * Enumeration of possible form types.
  */
 export enum FormFlag {
   Nil         = 0o1,
@@ -18,6 +22,19 @@ export enum FormFlag {
   Procedure   = 0o400,
   Any         = 0o777
 }
+
+
+export const formFlagOf = (form: EvalForm) => (
+    (form === null) ? FormFlag.Nil
+  : (form instanceof Identifier) ? FormFlag.Identifier
+  : (form instanceof Keyword) ? FormFlag.Keyword
+  : (Array.isArray(form)) ? FormFlag.List
+  : (form instanceof Map) ? FormFlag.Dictionary
+  : (typeof form === 'boolean') ? FormFlag.Boolean
+  : (typeof form === 'number') ? FormFlag.Number
+  : (typeof form === 'string') ? FormFlag.String
+  : FormFlag.Procedure
+);
 
 
 export const formFlagName = (flag: number) => {
