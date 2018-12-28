@@ -14,9 +14,31 @@ const idRest = /[a-z0-9+\-*/=<>&|!?$_]/i;
 
 
 /**
+ * Literal identifiers.
+ */
+const literals = {
+  nil: null,
+  true: true,
+  false: false
+};
+
+
+/**
+ * Retrieve corresponding identifier value.
+ */
+const getIdentifierValue = (
+  (name: string): null | boolean | IdentifierType => (
+    (name in literals)
+      ? literals[name]
+      : getIdentifier(name)
+  )
+);
+
+
+/**
  * Monalisp `Identifier` `Parser`.
  */
-export const identifierParser = plabel('identifier', pmap(getIdentifier, 
+export const identifierParser = plabel('identifier', pmap(getIdentifierValue, 
   pjoinFlat(pair(
     satisfyRegex(idBegin),
     star(satisfyRegex(idRest))

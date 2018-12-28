@@ -29,16 +29,6 @@ export class Identifier implements IdentifierType {
 export const Id = Identifier;
 
 
-/**
- * Literal identifiers.
- */
-const literals = {
-  nil: null,
-  true: true,
-  false: false
-};
-
-
 const identifierTable: {[key: string]: IdentifierType} = Object.create(null);
 
 
@@ -46,10 +36,8 @@ const identifierTable: {[key: string]: IdentifierType} = Object.create(null);
  * Return `Identifier` given it's *name*, literal identifier, e.g "true", will
  * return corresponding literal value.  
  */
-export const getIdentifier = (name: string): boolean | IdentifierType => (
-  (name in literals)
-    ? literals[name]
-    : (name in identifierTable)
-      ? identifierTable[name]
-      : (identifierTable[name] = Identifier.of(name))
+export const getIdentifier = (name: string): IdentifierType => (
+  (name in identifierTable)
+    ? identifierTable[name]
+    : (identifierTable[name] = Identifier.of(name))
 );
