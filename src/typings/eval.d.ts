@@ -103,26 +103,31 @@ interface StackTraceType extends Array<StackFrameType> {}
 
 
 
+
+
 // -- Runtime Monalisp Types --------------------------------------------------
 
 
-/**
- * Monalisp function constructor type.
- */
-interface ProcedureConstructor {}
+interface CallableType {
+  /**
+   * Call function with given *scope* and *parameters*.
+   */
+  call(scope: ScopeStackType, parameters: TaggedReaderForm[]): 
+  EvalResult<EvalForm>
+}
 
 
 /**
  * Monalisp function type. Called procedure to disambiguate from JavaScript's
  * builtin `Function` type.
  */
-interface ProcedureType {
+interface ProcedureType extends CallableType {
   
   /**
    * List of `Identifier` instances, representing the signature of this
    * funciton.
    */
-  signature: TaggedIdentifierType[];
+  signature: IdentifierType[];
 
   /**
    * List of expressions
@@ -132,15 +137,9 @@ interface ProcedureType {
 
 
 /**
- * Monalisp special form constructor type.
- */
-interface SpecialFormConstructor {}
-
-
-/**
  * Monalisp speical form type.
  */
-interface SpecialFormType {}
+interface SpecialFormType extends CallableType {}
 
 
 /**
@@ -158,13 +157,20 @@ interface DictionaryType extends Map<EvalForm, EvalForm> {}
 /**
  * Union of possible evaluation form types.
  */
-type EvalForm = AtomType | ListType | DictionaryType | ProcedureType | SpecialFormType;
+type EvalForm = AtomType | ListType | DictionaryType | CallableType;
 
 
 /**
  * Union of primitive runtime types that evaluate to themselves.
  */
-type SelfEvaluatingForm = boolean | number | string | KeywordType;
+type Primitive = null | boolean | number | string | KeywordType;
+
+
+/**
+ * Tagged types that evaluate to themselves at runtime.
+ */
+type TaggedPrimitive = ReaderTagType<Primitive>;
+
 
 
 
@@ -186,23 +192,9 @@ interface EvalFailureType {
 }
 
 
-type EvalResult<T extends EvalForm> = T | EvalFailureType;
+type EvalResult<T=EvalForm> = T | EvalFailureType;
 
 
-interface EvalFunctionType<A extends TaggedReaderForm, B extends EvalForm> {
-  (scope: ScopeStackType, form: A): EvalResult<B>;
-}
-
-
-interface EvaluatorConstructor {
-  of<T extends TaggedReaderForm, U extends EvalForm>(
-    run: EvalFunctionType<T, U>): EvaluatorType<T, U>;
-  new<T extends TaggedReaderForm, U extends EvalForm>(
-    run: EvalFunctionType<T, U>): EvaluatorType<T, U>;
-  readonly prototype: EvaluatorType<TaggedReaderForm, EvalForm>;
-}
-
-
-interface EvaluatorType<T extends TaggedReaderForm, U extends EvalForm> {
-  run: EvalFunctionType<T, U>;
+interface EvalFn<T=TaggedReaderForm, U=EvalForm> {
+  (scope: ScopeStackType, form: T): EvalResult<U>;
 }

@@ -5,12 +5,12 @@
 
 import {didParseFail} from './read/parse/parser';
 import {read} from './read/reader';
-import {evalForm, didEvalFail} from './eval/evaluator';
+import {didEvalFail} from './eval/eval-failure';
 import {globalScope} from './eval/global';
 
 
 export {read} from './read/reader';
-export {evalForm as evaluate} from './eval/evaluator';
+export {evalForm as evaluate} from './eval/eval-failure';
 
 
 /**

@@ -3,41 +3,96 @@
 //------------------------------------------------------------------------------
 
 
+import {head, tail} from '../~hyfns/list';
+import {FormFlag} from '../common/form-flag';
+import {EvalFailure, didEvalFail} from './eval-failure';
+import {Callable} from './type/callable';
+
+
 /**
- * Represents `Evaluator` error.
+ * Evaluates single reader form.
  */
-export class EvalFailure implements EvalFailureType {
-
-  /**
-   * Static factory function for `EvalFailure`.
-   */
-  static of(message: string, info?: CharStream.Info, trace?: StackTraceType): EvalFailureType {
-    return new EvalFailure(message, info, trace);
-  };
-
-  constructor(
-    public message: string, 
-    public info?: CharStream.Info, 
-    public trace?: StackTraceType
-  ) {};
-
-  toString() {
-    return this.message;
+export const evaluate: EvalFn = (scope, form) => {
+  switch (form.type) {
+    case FormFlag.Identifier:
+      return evalIdentifier(scope, form as TaggedIdentifierType);
+    case FormFlag.List:
+      return evalList(scope, form as TaggedReaderListType);
+    case FormFlag.Dictionary:
+      return evalDictionary(scope, form as TaggedReaderDictionaryType);
+    default:
+      return evalPrimitive(scope, form as TaggedPrimitive);
   }
 }
 
 
 /**
- * Return whether evaluation failed.
+ * Evaluate primitive form, where primitive means a form that evaluates to
+ * itself. Primitive forms are: `nil`, `boolean`, `number`, `string` and
+ * `Keyword`.
  */
-export const didEvalFail = <T>(form: EvalResult<T>): form is EvalFailure => (
-  form instanceof EvalFailure
+export const evalPrimitive: EvalFn<TaggedPrimitive, Primitive> = (
+  (_, form) => (
+    form.expression
+  )
 );
 
 
 /**
- * Return whether evaluation succeeded.
+ * Evaluates `Identifier` by resolving its value from given *scope*.
  */
-export const didEvalSucceed = <T>(form: EvalResult<T>): form is T => (
-  !(form instanceof EvalFailure)
+export const evalIdentifier: EvalFn<TaggedIdentifierType> = (scope, id) => (
+  scope.resolve(id.expression)
+);
+
+
+/**
+ * Evaluates `List` by invoking the first element of *taggedList* as a
+ * `Procedure`, with the subsequent elements as its arguments.
+ */
+export const evalList: EvalFn<TaggedReaderListType> = (scope, taggedList) => {
+  // Retrieve procedure (first element) from expression
+  const list = taggedList.expression;
+  const fn = evaluate(scope, head(list));
+  if (didEvalFail(fn)) {
+    return fn;
+  }
+
+  // Ensure fn is derrived from `Callable`
+  if (!(fn instanceof Callable)) {
+    const {info} = taggedList;
+    const message = `Cannot invoke ${fn} as a procedure.`
+    return EvalFailure.of(message, info);
+  }
+
+  // Call `Callable` instance with subsequent elements of *list*
+  return fn.call(scope, tail(list));
+};
+
+
+/**
+ * Evaluates `Dictionary` by sequentially evaluating each of its key, value
+ * pairs respectively.
+ */
+export const evalDictionary: EvalFn<TaggedReaderDictionaryType, DictionaryType> = (
+  (scope, taggedDictionary) => {
+    let result: DictionaryType;
+    for (let [taggedKey, taggedValue] of taggedDictionary.expression) {
+      // Evaluate *key*
+      let key = evaluate(scope, taggedKey);
+      if (didEvalFail(key)) {
+        return key;
+      }
+
+      // Evaluate *value*
+      let value = evaluate(scope, taggedValue);
+      if (didEvalFail(value)) {
+        return value;
+      }
+
+      // Add *key*, *value* pair to *result*
+      result.set(key, value);
+    }
+    return result;
+  }
 );
