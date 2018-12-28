@@ -12,14 +12,14 @@ import {Parser, run, didParseFail} from './parse/parser';
  * Enumeration of possible `SExpression` types.
  */
 export enum ReaderFormFlag {
-  Nil,
-  Boolean,
-  Number,
-  String,
-  Identifier,
-  Keyword,
-  List,
-  Dictionary
+  Nil         = 0o1,
+  Boolean     = 0o2,
+  Number      = 0o4,
+  String      = 0o10,
+  Identifier  = 0o20,
+  Keyword     = 0o40,
+  List        = 0o100,
+  Dictionary  = 0o200
 }
 
 

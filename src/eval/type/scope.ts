@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {last} from '../~hyfns/list';
+import {last} from '../../~hyfns/list';
 
 
 /**
@@ -37,6 +37,10 @@ export class Scope implements ScopeType {
   private table: Map<string, EvalForm>;
   constructor(entries?: Iterable<[IdentifierType, EvalForm]>) {
     this.table = (entries) ? new Map(nameOfIDs(entries)) : new Map();
+  }
+
+  get size(): number {
+    return this.table.size;
   }
 
   resolve(id: IdentifierType): EvalForm {

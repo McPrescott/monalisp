@@ -7,7 +7,8 @@
 // -- Reader Tag ---------------------------------------------------------------
 
 
-type ReaderFormFlagType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+type ReaderFormFlagType = 0o1| 0o2 | 0o4 | 0o10 | 0o20 | 0o40 | 0o100 | 0o200;
 
 
 interface ReaderTagConstructor {

@@ -11,7 +11,9 @@ TODO LIST
     + [x] Consider possibilities for generics in `ParseTagConstructor`
     + [x] Fix `CharStream.isDone` for `completion` combinator
   + [x] Investigate interpreter strategies instead of `eval` module
-  + [ ] Move IdentifierTable into `common/identifier.ts`
+  + [x] Move IdentifierTable into `common/identifier.ts`
+  + [ ] Unification of Reader and Evaluation forms
+  + [ ] Consider making IDTable, and KeywordTable, WeakMaps
   + [ ] Evaluation macros
   + [ ] Consider making fref of type `{ref: ParserType, parser: ParserType}`.
   + [ ] Remove `CharStream.Info.lineText`, ~Create `CharStream.Error`

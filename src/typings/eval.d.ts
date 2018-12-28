@@ -18,7 +18,12 @@ interface ScopeConstructor {
  * Represents a single scope in a Monalisp program.
  */
 interface ScopeType {
-  
+
+  /**
+   * Number of bindings within scope.
+   */
+  readonly size: number;
+
   /**
    * Resolve value of given *id*.
    */
