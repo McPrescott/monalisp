@@ -3,7 +3,7 @@ import {arrayEquals, equals} from './assert';
 import {map} from '../src/~hyfns/map';
 import {didParseFail} from '../src/read/parse/parser';
 import {read, evaluate, execute} from '../src/main';
-import {didEvalFail} from '../src/eval/evaluator';
+import {didEvalFail} from '../src/eval/eval-failure';
 import {getIdentifier as idOf} from '../src/common/identifier';
 import {pprint} from '../src/util';
 
@@ -66,11 +66,11 @@ describe('Monalisp', () => {
     '(- 100 33)', 67
   );
 
-  describeExec('Subtraction function',
+  describeExec('Multiplication function',
     '(* 8 8)', 64
   );
 
-  describeExec('Subtraction function',
+  describeExec('Division function',
     '(/ 9 3)', 3
   );
 

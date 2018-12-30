@@ -56,7 +56,7 @@ export class Signature {
     // Type check *evaluatedParameters* against *this.spec*
     for (let i=0; i<parameterLength; i++) {
       const form = evaluatedParameters[i];
-      const [name, type] = this.spec[i];
+      const [name, type] = this.spec[Math.min(i, this.spec.length-1)];
       const formType = formFlagOf(form);
       if (!(formType & type)) {
         const expectedType = formFlagName(type);

@@ -1,11 +1,21 @@
 // -----------------------------------------------------------------------------
-// -- BUILTIN MATH PROCEDURES
+// -- BUILTIN MATH LIBRARY
 //------------------------------------------------------------------------------
 
 
 import {FormFlag} from '../../common/form-flag';
 import {BuiltinProcedure as Builtin, Signature} from '../type/builtin';
 
+
+// -- Constants ----------------------------------------------------------------
+
+export const PI = Math.PI;
+export const TAU = 2*Math.PI;
+export const E = Math.E;
+export const PHI = (1 + Math.sqrt(5)) / 2;
+
+
+// -- Functions ----------------------------------------------------------------
 
 const numberListSignature = Signature.of([['numbers', FormFlag.Number]], true);
 const nullarySignature = Signature.of([]);

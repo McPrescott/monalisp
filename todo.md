@@ -12,7 +12,7 @@ TODO LIST
     + [x] Fix `CharStream.isDone` for `completion` combinator
   + [x] Investigate interpreter strategies instead of `eval` module
   + [x] Move IdentifierTable into `common/identifier.ts`
-  + [ ] Unification of Reader and Evaluation forms
+  + [x] Unification of Reader and Evaluation forms
   + [ ] Consider making IDTable, and KeywordTable, WeakMaps
   + [ ] Evaluation macros
   + [ ] Consider making fref of type `{ref: ParserType, parser: ParserType}`.
