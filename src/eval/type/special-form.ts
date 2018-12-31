@@ -125,6 +125,7 @@ export class Signature {
       }
       else {
         parameterList.push(parameters.slice(i));
+        break;
       }
     }
     return parameterList;
