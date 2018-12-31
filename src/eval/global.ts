@@ -26,6 +26,8 @@ def('def', specialForms.def);
 def('fn', specialForms.fn);
 def('if', specialForms.if_);
 def('quote', specialForms.quote);
+def('and', specialForms.and);
+def('or', specialForms.or);
 
 
 // -- Define Builtin Math ------------------------------------------------------

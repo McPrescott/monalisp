@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {isDefined} from '../../~hyfns/logic';
+import {isDefined, not} from '../../~hyfns/logic';
 import {Identifier} from '../../common/identifier';
 import {FormFlag as Flag} from '../../common/form-flag';
 import {EvalFailure, didEvalFail} from '../eval-failure';
@@ -104,5 +104,41 @@ export const if_ = SpecialForm.of(
         ? evaluate(scope, falseBranch)
         : null;
     }
+  }
+);
+
+
+/**
+ * Monalisp `SpecialForm` that returns first falsy-value, or last truthy-value.
+ */
+export const and = SpecialForm.of(
+  Signature.of(['forms', Flag.Any, Rest]),
+  (scope, [forms]: [TaggedReaderForm[]]) => {
+    let result: EvalResult = null;
+    for (const form of forms) {
+      result = evaluate(scope, form);
+      if (didEvalFail(result) || not(result)) {
+        return result;
+      }
+    }
+    return result;
+  }
+);
+
+
+/**
+ * Monalisp `SpecialForm` that returns first truthy-value, or last falsy-value.
+ */
+export const or = SpecialForm.of(
+  Signature.of(['forms', Flag.Any, Rest]),
+  (scope, [forms]: [TaggedReaderForm[]]) => {
+    let result: EvalResult = null;
+    for (const form of forms) {
+      result = evaluate(scope, form);
+      if (didEvalFail(result) || Boolean(result)) {
+        return result;
+      }
+    }
+    return result;
   }
 );

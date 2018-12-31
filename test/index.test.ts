@@ -106,6 +106,10 @@ describe('Monalisp', () => {
     )
   );
 
+  describeExec('The and/or special forms',
+    '(* (and 1 2 3 4) (or 0 false nil 2 100))', 8
+  );
+
   // describeExec('Identifier Definition',
   //   '(def id 123) id', 123
   // );
