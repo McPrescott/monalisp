@@ -25,6 +25,7 @@ const def = (name: string, form: EvalForm) => (
 def('def', specialForms.def);
 def('fn', specialForms.fn);
 def('if', specialForms.if_);
+def('quote', specialForms.quote);
 
 
 // -- Define Builtin Math ------------------------------------------------------

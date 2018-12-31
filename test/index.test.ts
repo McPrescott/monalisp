@@ -1,10 +1,10 @@
 import {describe, it} from 'mocha';
-import {arrayEquals, equals} from './assert';
+import {assert, equals, arrayEquals} from './assert';
 import {map} from '../src/~hyfns/map';
+import {Identifier} from '../src/common/identifier';
 import {didParseFail} from '../src/read/parse/parser';
 import {read, evaluate, execute} from '../src/main';
 import {didEvalFail} from '../src/eval/eval-failure';
-import {getIdentifier as idOf} from '../src/common/identifier';
 import {pprint} from '../src/util';
 
 
@@ -12,9 +12,15 @@ import {pprint} from '../src/util';
 const execIt = (source: string, expect: any) => {
   it(`Exec: ${source} = ${expect}`, () => {
     const result = execute(source);
-    if (didEvalFail(result))
+    if (didEvalFail(result)) {
       throw new EvalError(result.toString());
-    equals(result, expect, `Got: ${result}`);
+    }
+    if (expect instanceof Function) {
+      assert(expect(result), `${result} failed assertion`);
+    }
+    else {
+      equals(result, expect, `${result} != ${expect}`);
+    }
   });
 };
 
@@ -46,16 +52,11 @@ const describeExec = (title: string, source: string, expect: any) => {
 
 describe('Monalisp', () => {
 
-  describeRead('Read number', 
-    '5', [5]
-  );
+
+  // -- Math Library -----------------------------------------------------------
 
   describeExec('Exec number',
     '5', 5
-  );
-
-  describeRead('Read list',
-    '(+ 10 20)', [[idOf('+'), 10, 20]]
   );
 
   describeExec('Addition function',
@@ -74,8 +75,31 @@ describe('Monalisp', () => {
     '(/ 9 3)', 3
   );
 
+  describeExec('Random function', 
+    '(random)', (x: any) => (typeof x === 'number' && x > 0 && x < 1)
+  );
+
+
+  // -- Special Forms ----------------------------------------------------------
+
   describeExec('Variable definition',
-    '(def x 10) x', 10
+    '(def x (+ 20 25 30)) x', 75
+  );
+
+  describeExec('Procedure definition', 
+    '(def add-10 (fn (y) (+ 10 y))) (add-10 30)', 40
+  );
+
+  describeExec('Conditionals',
+    '(if true (def x 5) (def x -100)) \
+    (if nil (def y -100) (def y 5)) \
+    (+ x y)', 10
+  );
+
+  describeExec('The quote special form',
+    '(quote id)', (form: any) => (
+      form instanceof Identifier && form.name === 'id'
+    )
   );
 
   // describeExec('Identifier Definition',

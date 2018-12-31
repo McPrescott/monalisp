@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 
 
+import {isDefined} from '../../~hyfns/logic';
 import {Identifier} from '../../common/identifier';
 import {FormFlag as Flag} from '../../common/form-flag';
 import {EvalFailure, didEvalFail} from '../eval-failure';
@@ -11,7 +12,7 @@ import {Procedure} from '../type/procedure';
 import {SpecialForm, Signature, ParameterKind} from '../type/special-form';
 
 
-const {Required, Optional, Rest} = ParameterKind;
+const {Optional, Rest} = ParameterKind;
 
 
 /**
@@ -33,7 +34,7 @@ export const def = SpecialForm.of(
  * Monalisp `SpecialForm` for creating a `Procedure`.
  */
 export const fn = SpecialForm.of(
-  Signature.of(['args', Flag.List], ['exprs', Flag.List, Rest]),
+  Signature.of(['args', Flag.List], ['exprs', Flag.Any, Rest]),
   (scope, [args, exprs]: [TaggedReaderListType, TaggedReaderListType[]]) => {
     const arglist: IdentifierType[] = []
     for (const taggedId of args.expression) {
@@ -51,6 +52,36 @@ export const fn = SpecialForm.of(
 
 
 /**
+ * Strip expression from given *form* and from any nested `TaggedReaderForm`. 
+ */
+const stripExpression = (form: TaggedReaderForm): EvalForm => {
+  const {expression} = form;
+  if (Array.isArray(expression)) {
+    return expression.map(stripExpression);
+  }
+  if (expression instanceof Map) {
+    const dictionary = new Map()
+    for (const [key, value] of expression) {
+      dictionary.set(stripExpression(key), stripExpression(value));
+    }
+    return dictionary;
+  }
+  return expression;
+}
+
+
+/**
+ * Monalisp `SpecialForm` for returning given form unevaluated.
+ */
+export const quote = SpecialForm.of(
+  Signature.of(['form', Flag.Any]),
+  (scope, [form]: [TaggedReaderForm]) => (
+    stripExpression(form)
+  )
+);
+
+
+/**
  * Monalisp conditional `SpecialForm`.
  */
 export const if_ = SpecialForm.of(
@@ -59,7 +90,8 @@ export const if_ = SpecialForm.of(
     ['true-branch', Flag.Any],
     ['false-branch', Flag.Any, Optional]
   ),
-  (scope, [cond, trueBranch, falseBranch]: [TaggedReaderForm, TaggedReaderForm, TaggedReaderForm?]) => {
+  (scope, params: [TaggedReaderForm, TaggedReaderForm, TaggedReaderForm?]) => {
+    const [cond, trueBranch, falseBranch] = params;
     const condResult = evaluate(scope, cond);
     if (didEvalFail(condResult)) {
       return condResult
@@ -67,11 +99,10 @@ export const if_ = SpecialForm.of(
     else if (condResult) {
       return evaluate(scope, trueBranch);
     }
-    else if (falseBranch === undefined) {
-      return null;
-    }
     else {
-      return evaluate(scope, falseBranch);
+      return (isDefined(falseBranch))
+        ? evaluate(scope, falseBranch)
+        : null;
     }
   }
 );
