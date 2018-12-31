@@ -38,6 +38,10 @@ def('τ', math.TAU);
 def('E', math.E);
 def('PHI', math.PHI);
 def('φ', math.PHI);
+def('EPSILON', math.EPSILON);
+def('ε', math.EPSILON);
+def('INF', math.INFINITY);
+def('-INF', math.NEGATIVE_INFINITY);
 
 // functions
 def('+', math.add);

@@ -13,6 +13,9 @@ export const PI = Math.PI;
 export const TAU = 2*Math.PI;
 export const E = Math.E;
 export const PHI = (1 + Math.sqrt(5)) / 2;
+export const EPSILON = (Number.EPSILON || 2.220446049250313e-16);
+export const INFINITY = Number.POSITIVE_INFINITY;
+export const NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 
 
 // -- Functions ----------------------------------------------------------------

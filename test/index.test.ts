@@ -79,6 +79,10 @@ describe('Monalisp', () => {
     '(random)', (x: any) => (typeof x === 'number' && x > 0 && x < 1)
   );
 
+  describeExec('Numeric Constants',
+    '(+ π φ τ E ε)', Math.PI*3 + ((1+Math.sqrt(5))/2) + Math.E + Number.EPSILON
+  );
+
 
   // -- Special Forms ----------------------------------------------------------
 

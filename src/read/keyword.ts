@@ -28,7 +28,7 @@ export const getKey = (name: string): KeywordType => (
 
 const label = plabel('keyword');
 const pcolon = pchar(COLON);
-const validChars = satisfyRegex(/[a-z0-9+\-*/=<>&|!?$_]/i);
+const validChars = satisfyRegex(/[a-z0-9+\-*/=<>&|!?$_]|\p{Script=Greek}/i);
 const keyString = pjoinFlat(pair(pcolon, plus(validChars)));
 
 
