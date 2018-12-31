@@ -14,7 +14,7 @@ import {Callable} from './callable';
 /**
  * Representation of single `SpecialForm` parameter.
  */
-type Parameter = [string, number];
+type Parameter = [string, number, boolean?];
 
 
 /**
