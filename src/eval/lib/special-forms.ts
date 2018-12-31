@@ -8,23 +8,17 @@ import {FormFlag as Flag} from '../../common/form-flag';
 import {EvalFailure, didEvalFail} from '../eval-failure';
 import {evaluate} from '../evaluator';
 import {Procedure} from '../type/procedure';
-import {SpecialForm, Signature} from '../type/special-form';
+import {SpecialForm, Signature, ParameterKind} from '../type/special-form';
 
 
-const signature = (...parameters: [string, number][]) => (
-  Signature.of(parameters, false)
-);
-
-const variadic = (...parameters: [string, number][]) => (
-  Signature.of(parameters, true)
-);
+const {Required, Optional, Rest} = ParameterKind;
 
 
 /**
  * Monalisp `SpecialForm` for binding an `EvalForm` to an `Identifier`.
  */
 export const def = SpecialForm.of(
-  signature(['id', Flag.Identifier], ['form', Flag.Any]),
+  Signature.of(['id', Flag.Identifier], ['form', Flag.Any]),
   (scope, [taggedId, taggedForm]: [TaggedIdentifierType, TaggedReaderForm]) => {
     const form = evaluate(scope, taggedForm);
     if (didEvalFail(form))
@@ -39,7 +33,7 @@ export const def = SpecialForm.of(
  * Monalisp `SpecialForm` for creating a `Procedure`.
  */
 export const fn = SpecialForm.of(
-  variadic(['args', Flag.List], ['exprs', Flag.List]),
+  Signature.of(['args', Flag.List], ['exprs', Flag.List, Rest]),
   (scope, [args, exprs]: [TaggedReaderListType, TaggedReaderListType[]]) => {
     const arglist: IdentifierType[] = []
     for (const taggedId of args.expression) {
@@ -52,5 +46,32 @@ export const fn = SpecialForm.of(
       arglist.push(id);
     }
     return Procedure.of(scope, arglist, exprs);
+  }
+);
+
+
+/**
+ * Monalisp conditional `SpecialForm`.
+ */
+export const if_ = SpecialForm.of(
+  Signature.of(
+    ['cond', Flag.Any],
+    ['true-branch', Flag.Any],
+    ['false-branch', Flag.Any, Optional]
+  ),
+  (scope, [cond, trueBranch, falseBranch]: [TaggedReaderForm, TaggedReaderForm, TaggedReaderForm?]) => {
+    const condResult = evaluate(scope, cond);
+    if (didEvalFail(condResult)) {
+      return condResult
+    }
+    else if (condResult) {
+      return evaluate(scope, trueBranch);
+    }
+    else if (falseBranch === undefined) {
+      return null;
+    }
+    else {
+      return evaluate(scope, falseBranch);
+    }
   }
 );

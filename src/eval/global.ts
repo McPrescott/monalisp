@@ -5,6 +5,7 @@
 
 import {getIdentifier} from '../common/identifier';
 import {Scope, ScopeStack} from './type/scope';
+import * as specialForms from './lib/special-forms';
 import * as math from './lib/math';
 
 
@@ -17,6 +18,13 @@ const globalScope = Scope.of();
 const def = (name: string, form: EvalForm) => (
   globalScope.define(getIdentifier(name), form)
 );
+
+
+// -- Define Special Forms -----------------------------------------------------
+
+def('def', specialForms.def);
+def('fn', specialForms.fn);
+def('if', specialForms.if_);
 
 
 // -- Define Builtin Math ------------------------------------------------------

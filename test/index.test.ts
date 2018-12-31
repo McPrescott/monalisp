@@ -74,6 +74,10 @@ describe('Monalisp', () => {
     '(/ 9 3)', 3
   );
 
+  describeExec('Variable definition',
+    '(def x 10) x', 10
+  );
+
   // describeExec('Identifier Definition',
   //   '(def id 123) id', 123
   // );
