@@ -89,13 +89,13 @@ export class ScopeStack implements ScopeStackType {
   };
   
   resolve(id: IdentifierType): EvalForm {
-    let resolved: EvalForm;
-    for (const scope of this.stack) {
-      if (scope.isDefined(id))
-        resolved = scope.resolve(id);
-        break;
+    for (let i=this.stack.length-1; i>=0; i--) {
+      const scope = this.stack[i];
+      if (scope.isDefined(id)) {
+        return scope.resolve(id);
+      }
     }
-    return resolved;
+    return null;
   };
   
   define(id: IdentifierType, value: EvalForm): EvalForm {
