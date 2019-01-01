@@ -24,6 +24,9 @@ export enum FormFlag {
 }
 
 
+/**
+ * Return `FormFlag` of given *form*.
+ */
 export const formFlagOf = (form: EvalForm) => (
     (form === null) ? FormFlag.Nil
   : (form instanceof Identifier) ? FormFlag.Identifier
@@ -37,6 +40,25 @@ export const formFlagOf = (form: EvalForm) => (
 );
 
 
+/**
+ * Return whether given flags overlap.
+ */
+export const isTypeMatch = (flag1: number, flag2: number) => (
+  flag1 & flag2
+);
+
+
+/**
+ * Return whether given flags do NOT overlap
+ */
+export const isNotTypeMatch = (flag1: number, flag2: number) => (
+  !(flag1 & flag2)
+);
+
+
+/**
+ * Return name(s) of types associated with given *flag*.
+ */
 export const formFlagName = (flag: number) => {
   if (flag in FormFlag) {
     return FormFlag[flag];

@@ -8,8 +8,9 @@ import {Identifier} from '../../common/identifier';
 import {FormFlag as Flag} from '../../common/form-flag';
 import {EvalFailure, didEvalFail} from '../eval-failure';
 import {evaluate} from '../evaluator';
+import {Signature} from '../type/signature';
 import {Procedure} from '../type/procedure';
-import {SpecialForm, Signature, ParameterKind} from '../type/special-form';
+import {SpecialForm, ParameterKind} from '../type/special-form';
 
 
 const {Optional, Rest} = ParameterKind;

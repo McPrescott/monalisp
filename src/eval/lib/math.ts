@@ -4,7 +4,8 @@
 
 
 import {FormFlag} from '../../common/form-flag';
-import {BuiltinProcedure as Builtin, Signature} from '../type/builtin';
+import {Signature, ParameterKind} from '../type/signature';
+import {BuiltinProcedure as Builtin} from '../type/builtin';
 
 
 // -- Constants ----------------------------------------------------------------
@@ -20,12 +21,15 @@ export const NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 
 // -- Functions ----------------------------------------------------------------
 
-const numberListSignature = Signature.of([['numbers', FormFlag.Number]], true);
-const nullarySignature = Signature.of([]);
-const unarySignature = Signature.of([['x', FormFlag.Number]]);
-const binarySignature = Signature.of([
+const {Rest} = ParameterKind;
+
+
+const numberListSignature = Signature.of(['numbers', FormFlag.Number, Rest]);
+const nullarySignature = Signature.of();
+const unarySignature = Signature.of(['x', FormFlag.Number]);
+const binarySignature = Signature.of(
   ['x', FormFlag.Number], ['y', FormFlag.Number]
-]);
+);
 
 
 const nullary = (fn: () => number) => (
@@ -54,7 +58,7 @@ const binary = (fn: (x: number, y: number) => number) => (
  */
 export const add = Builtin.of(
   numberListSignature,
-  (sum: number = 0, ...numbers: number[]) => {
+  ([sum=0, ...numbers]: [number, ...number[]]) => {
     for (const n of numbers)
       sum += n;
     return sum;
@@ -67,7 +71,7 @@ export const add = Builtin.of(
  */
 export const subtract = Builtin.of(
   numberListSignature,
-  (difference: number = 0, ...numbers: number[]) => {
+  ([difference=0, ...numbers]: [number, ...number[]]) => {
     for (const n of numbers)
       difference -= n;
     return difference;
@@ -80,7 +84,7 @@ export const subtract = Builtin.of(
  */
 export const multiply = Builtin.of(
   numberListSignature,
-  (product: number = 1, ...numbers: number[]) => {
+  ([product=1, ...numbers]: [number, ...number[]]) => {
     for (const n of numbers)
       product *= n;
     return product;
@@ -93,7 +97,7 @@ export const multiply = Builtin.of(
  */
 export const divide = Builtin.of(
   numberListSignature,
-  (quotient: number = 1, ...numbers: number[]) => {
+  ([quotient=1, ...numbers]: [number, ...number[]]) => {
     for (const n of numbers)
       quotient /= n;
     return quotient;
@@ -105,7 +109,7 @@ export const divide = Builtin.of(
  * Builtin modulo function.
  */
 export const modulo = Builtin.of(
-  Signature.of([['dividend', FormFlag.Number], ['divisor', FormFlag.Number]]),
+  Signature.of(['dividend', FormFlag.Number], ['divisor', FormFlag.Number]),
   (dividend: number, divisor: number) => (
     dividend % divisor
   )
@@ -135,6 +139,6 @@ export const tanh = unary(Math.tanh);
 export const atan = unary(Math.atan);
 export const atanh = unary(Math.atanh);
 export const atan2 = Builtin.of(
-  Signature.of([['y', FormFlag.Number], ['x', FormFlag.Number]]),
+  Signature.of(['y', FormFlag.Number], ['x', FormFlag.Number]),
   Math.atan2
 );
