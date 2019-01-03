@@ -6,6 +6,7 @@
 import {isDefined, not} from '../../~hyfns/logic';
 import {Identifier} from '../../common/identifier';
 import {FormFlag as Flag} from '../../common/form-flag';
+import {stripExpression} from '../misc';
 import {EvalFailure, didEvalFail} from '../eval-failure';
 import {evaluate} from '../evaluator';
 import {Signature} from '../type/signature';
@@ -50,25 +51,6 @@ export const fn = SpecialForm.of(
     return Procedure.of(scope, arglist, exprs);
   }
 );
-
-
-/**
- * Strip expression from given *form* and from any nested `TaggedReaderForm`. 
- */
-const stripExpression = (form: TaggedReaderForm): EvalForm => {
-  const {expression} = form;
-  if (Array.isArray(expression)) {
-    return expression.map(stripExpression);
-  }
-  if (expression instanceof Map) {
-    const dictionary = new Map()
-    for (const [key, value] of expression) {
-      dictionary.set(stripExpression(key), stripExpression(value));
-    }
-    return dictionary;
-  }
-  return expression;
-}
 
 
 /**

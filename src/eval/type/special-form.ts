@@ -7,11 +7,11 @@
 
 
 import {apply} from '../../~hyfns';
-import {formFlagName} from '../../common/form-flag';
-import {EvalFailure, didEvalFail} from '../eval-failure';
+import {didEvalFail} from '../eval-failure';
 import {Callable} from './callable';
 import {bind} from './bind';
 import {Signature, verifyArity, typeCheck, transform} from './signature';
+
 
 export enum ParameterKind {
   // Begin at one so no values are falsy
@@ -19,12 +19,6 @@ export enum ParameterKind {
   Optional=2,
   Rest=3
 }
-
-
-/**
- * Representation of single `SpecialForm` parameter.
- */
-type Parameter = [string, number, ParameterKind?];
 
 
 /**

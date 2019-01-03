@@ -4,9 +4,8 @@
 
 
 import {apply} from '../../~hyfns';
-import {formFlagOf, formFlagName} from '../../common/form-flag';
 import {Callable} from './callable';
-import {EvalFailure, didEvalFail} from '../eval-failure';
+import {didEvalFail} from '../eval-failure';
 import {evaluateSequence} from '../evaluator';
 import {bind} from './bind';
 import {Signature, verifyArity, typeCheck, transform} from './signature';
