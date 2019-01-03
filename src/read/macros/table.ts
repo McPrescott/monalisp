@@ -11,7 +11,7 @@ import {bulletMacro} from './bullet';
 /**
  * The reader macro table.
  */
-export const macroTable: Table<ParserType<ReaderForm>> = Object.create(null);
+export const macroTable: Table<ParserType<FormType>> = Object.create(null);
 
 
 macroTable[QUOTE] = quoteMacro;

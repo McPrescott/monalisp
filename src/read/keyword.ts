@@ -3,27 +3,12 @@
 //------------------------------------------------------------------------------
 
 
-import {Keyword} from '../common/keyword';
+import {getKey} from '../common/keyword';
 import {COLON} from './parse/common/chars';
 import {plabel, pmap} from './parse/parser';
 import {pjoinFlat, pair, plus} from './parse/parsers/combinators';
 import {pchar, satisfyRegex} from './parse/parsers/string';
 
-
-/**
- * Table of existing `Keyword` instances.
- */
-const keyTable: {[key: string]: KeywordType} = Object.create(null);
-
-
-/**
- * Return `Keyword` given it's *name*.
- */
-export const getKey = (name: string): KeywordType => (
-  (name in keyTable) 
-    ? keyTable[name]
-    : (keyTable[name] = Keyword.of(name))
-);
 
 
 const label = plabel('keyword');

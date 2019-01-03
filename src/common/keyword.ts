@@ -24,3 +24,19 @@ export class Keyword implements KeywordType {
     return this.key;
   }
 }
+
+
+/**
+ * Table of existing `Keyword` instances.
+ */
+const keyTable: {[key: string]: KeywordType} = Object.create(null);
+
+
+/**
+ * Return `Keyword` given it's *name*.
+ */
+export const getKey = (name: string): KeywordType => (
+  (name in keyTable) 
+    ? keyTable[name]
+    : (keyTable[name] = Keyword.of(name))
+);

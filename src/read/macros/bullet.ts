@@ -9,8 +9,9 @@ import {toInt} from '../parse/common/transformers';
 import {Parser, run, pmap, didParseFail, ParseFailure} from '../parse/parser';
 import {after, attempt, choice} from '../parse/parsers/combinators';
 import {pchar, satisfyRegex} from '../parse/parsers/string';
+import {FormFlag as Type} from '../../common/form-flag';
+import {variable} from '../../common/variable';
 import {getIdentifier} from '../../common/identifier';
-import {ReaderTag, ReaderFormFlag} from '../tagging';
 import {listParserOf} from '../list';
 import {readerFormParser} from '../s-expression';
 
@@ -23,11 +24,11 @@ const parg = choice<string|number>(pindexed, pdot);
 /**
  * Return `Tagged<Identifier>` for corresponding bullet macro argument.
  */
-const getArgIdentifier = (n: number, info: CharStream.Info): TaggedIdentifierType => (
-  ReaderTag.fromExpanded(
+const getArgIdentifier = (n: number, state: CharStream.State): VariableType => (
+  variable(
     getIdentifier(`arg${n}`) as IdentifierType,
-    ReaderFormFlag.Identifier,
-    info
+    state,
+    Type.Identifier
   )
 );
 
@@ -35,11 +36,11 @@ const getArgIdentifier = (n: number, info: CharStream.Info): TaggedIdentifierTyp
 /**
  * Return expanded list of `Tagged<Idnetifier>`.
  */
-const getArgList = (total: number, info: CharStream.Info): TaggedReaderListType => {
+const getArgList = (total: number, state: CharStream.State): VariableType => {
   let argList = [];
   for(let i=1; i<=total; i++)
-    argList.push(getArgIdentifier(i, info));
-  return ReaderTag.fromExpanded(argList, ReaderFormFlag.List, info);
+    argList.push(getArgIdentifier(i, state));
+  return variable(argList, state, Type.List);
 }
 
 
@@ -47,14 +48,14 @@ const getArgList = (total: number, info: CharStream.Info): TaggedReaderListType 
  * Return new `Parser` for bullet macro arguments.
  */
 const argumentParser = () => {
-  let state: {n: number, parser: ParserType<TaggedIdentifierType>} = {
+  let state: {n: number, parser: ParserType<VariableType>} = {
     n: 0,
     parser: null
   };
 
   let areAllUnindexed = true;
   state.parser = Parser.of((stream) => {
-    const info = stream.info;
+    const {state: streamState} = stream;
     const result = run(parg, stream);
     if (didParseFail(result))
       return result;
@@ -76,7 +77,7 @@ const argumentParser = () => {
         stream.info
       );
     }
-    return getArgIdentifier(argNumber, info) as TaggedIdentifierType;
+    return getArgIdentifier(argNumber, streamState);
   });
   return state;
 };
@@ -86,26 +87,26 @@ const argumentParser = () => {
  * Return `Tagged<Identifier>` with given `CharStream` *info*.
  */
 const expanded = (
-  expression: TaggedReaderForm[],
+  expression: VariableType[],
   argNumber: number,
-  info: CharStream.Info
+  state: CharStream.State
 ) => ([
-  ReaderTag.fromExpanded(getIdentifier('fn'), ReaderFormFlag.Identifier, info),
-  getArgList(argNumber, info),
+  variable(getIdentifier('fn'), state, Type.Identifier),
+  getArgList(argNumber, state),
   expression
-]);
+] as ListType);
 
 
 /**
  * Monalisp's bullet macro (`•`).
  */
-export const bulletMacro: ParserType<ReaderListType> = Parser.of((stream) => {
-  const info = stream.info;
+export const bulletMacro: ParserType<ListType> = Parser.of((stream) => {
+  const {state} = stream;
   const args = argumentParser();
   const elementParser = choice(readerFormParser, args.parser);
   const parser = listParserOf(elementParser);
   const expression = run(parser,  stream);
   if (didParseFail(expression))
     return expression;
-  return expanded(expression, args.n, info) as ReaderListType;
+  return expanded(expression, args.n, state);
 });

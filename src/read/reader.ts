@@ -27,7 +27,7 @@ export const listParser = listParserOf(readerFormParser);
 export const dictionaryParser = dictionaryParserOf(readerFormParser, readerFormParser);
 
 
-readerFormParserRef.parser = ptag(choice<ReaderForm>(
+readerFormParserRef.parser = ptag(choice<FormType>(
   macroParser,
   atomParser,
   listParser,

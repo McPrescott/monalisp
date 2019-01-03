@@ -4,26 +4,26 @@
 
 
 import {Parser, run, didParseFail} from '../parse/parser';
+import {FormFlag as Type} from '../../common/form-flag';
+import {variable} from '../../common/variable';
 import {getIdentifier} from '../../common/identifier';
-import {ReaderTag, ReaderFormFlag} from '../tagging';
 import {readerFormParser} from '../s-expression';
 
 
 /**
  * Return `Tagged<Identifier>` with given `CharStream` *info*.
  */
-const taggedQuote = (info: CharStream.Info) => {
-  const id = getIdentifier('quote')
-  return ReaderTag.fromExpanded(id, ReaderFormFlag.Identifier, info);
-}
+const quoteVar = (state: CharStream.State) => (
+  variable(getIdentifier('quote'), state, Type.Identifier)
+);
 
 
 /**
  * Monalisp's quote macro (`'`).
  */
-export const quoteMacro: ParserType<ReaderForm> = Parser.of((stream) => {
+export const quoteMacro: ParserType<FormType> = Parser.of((stream) => {
   const expression = run(readerFormParser, stream);
   if (didParseFail(expression))
     return expression;
-  return [taggedQuote(stream.info), expression];
+  return [quoteVar(stream.state), expression];
 });

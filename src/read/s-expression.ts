@@ -7,7 +7,7 @@ import {plabel} from './parse/parser';
 import {fref} from './parse/parsers/combinators';
 
 
-const [ref, parser] = fref<TaggedReaderForm>();
+const [ref, parser] = fref<VariableType>();
 
 
 /**

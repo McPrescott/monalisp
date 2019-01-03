@@ -10,7 +10,7 @@ import {macroTable} from './macros/table';
 /**
  * Monalisp reader macro `Parser`.
  */
-export const macroParser: ParserType<ReaderForm> = Parser.of((stream) => {
+export const macroParser: ParserType<FormType> = Parser.of((stream) => {
   if (stream.peek() in macroTable) {
     return run(macroTable[stream.next()], stream);
   }

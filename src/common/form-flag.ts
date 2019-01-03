@@ -27,7 +27,7 @@ export enum FormFlag {
 /**
  * Return `FormFlag` of given *form*.
  */
-export const formFlagOf = (form: EvalForm) => (
+export const formFlagOf = (form: FormType) => (
     (form === null) ? FormFlag.Nil
   : (form instanceof Identifier) ? FormFlag.Identifier
   : (form instanceof Keyword) ? FormFlag.Keyword
