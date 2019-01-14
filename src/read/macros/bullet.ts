@@ -24,23 +24,19 @@ const parg = choice<string|number>(pindexed, pdot);
 /**
  * Return `Tagged<Identifier>` for corresponding bullet macro argument.
  */
-const getArgIdentifier = (n: number, state: CharStream.State): VariableType => (
-  variable(
-    getIdentifier(`arg${n}`) as IdentifierType,
-    state,
-    Type.Identifier
-  )
+const getArgIdentifier = (n: number, state: CharStream.State): VarType => (
+  variable(getIdentifier(`arg${n}`) as IdentifierType, state)
 );
 
 
 /**
  * Return expanded list of `Tagged<Idnetifier>`.
  */
-const getArgList = (total: number, state: CharStream.State): VariableType => {
+const getArgList = (total: number, state: CharStream.State): VarType => {
   let argList = [];
   for(let i=1; i<=total; i++)
     argList.push(getArgIdentifier(i, state));
-  return variable(argList, state, Type.List);
+  return variable(argList, state);
 }
 
 
@@ -48,7 +44,7 @@ const getArgList = (total: number, state: CharStream.State): VariableType => {
  * Return new `Parser` for bullet macro arguments.
  */
 const argumentParser = () => {
-  let state: {n: number, parser: ParserType<VariableType>} = {
+  let state: {n: number, parser: ParserType<VarType>} = {
     n: 0,
     parser: null
   };
@@ -87,11 +83,11 @@ const argumentParser = () => {
  * Return `Tagged<Identifier>` with given `CharStream` *info*.
  */
 const expanded = (
-  expression: VariableType[],
+  expression: VarType[],
   argNumber: number,
   state: CharStream.State
 ) => ([
-  variable(getIdentifier('fn'), state, Type.Identifier),
+  variable(getIdentifier('fn'), state),
   getArgList(argNumber, state),
   expression
 ] as ListType);

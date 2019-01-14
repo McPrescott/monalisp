@@ -31,7 +31,7 @@ export const stripExpression = (form: TaggedReaderForm): EvalForm => {
 export const tagExpanded = (
   (form: EvalForm, info: CharStream.Info): EvalResult<TaggedReaderForm> => {
     const formFlag = formFlagOf(form);
-    if (formFlag === FormFlag.Procedure) {
+    if (formFlag === FormFlag.Callable) {
       const message = `Reader forms cannot be of type Procedure.`;
       return EvalFailure.of(message, info)
     }

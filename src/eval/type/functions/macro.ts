@@ -4,12 +4,12 @@
 
 
 
-import {last, zip} from '../../~hyfns/list';
-import {stripExpression, tagExpanded} from '../misc';
+import {last, zip} from '../../../~hyfns/list';
+import {stripExpression, tagExpanded} from '../../misc';
 import {Callable} from './callable';
-import {Scope} from './scope';
-import {EvalFailure, didEvalFail} from '../eval-failure';
-import {evaluateSequence, evaluate} from '../evaluator';
+import {Scope} from '../scope';
+import {EvalFailure, didEvalFail} from '../../eval-failure';
+import {evaluateSequence, evaluate} from '../../evaluator';
 
 
 /**
@@ -20,20 +20,21 @@ export class Macro extends Callable {
   /**
    * Static factory function of `Procedure`.
    */
-  static of(closure: ScopeStackType, signature: IdentifierType[], body: TaggedReaderForm[]) {
+  static of(closure: ScopeStackType, signature: IdentifierType[], body: VarType[]) {
     return new Macro(closure, signature, body);
   }
 
   constructor(
     public closure: ScopeStackType,
     public signature: IdentifierType[],
-    public body: TaggedReaderForm[]
+    public body: VarType[]
   ) { super(); }
 
-  /**
-   * Call this `Procedure` with given *scope* and *parameters*.
-   */
-  call(scope: ScopeStackType, parameters: TaggedReaderForm[]) {
+  get shouldEvaluateParameters() {
+    return false;
+  }
+
+  call(scope: ScopeStackType, parameters: ListVar) {
     // Ensure parameters is less than arity
     const arity = this.signature.length;
     const parameterLength = parameters.length;

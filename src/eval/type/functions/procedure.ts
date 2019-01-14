@@ -3,58 +3,54 @@
 //------------------------------------------------------------------------------
 
 
-import {last, zip} from '../../~hyfns/list';
+import {last, zip} from '../../../~hyfns/list';
 import {Callable} from './callable';
-import {Scope} from './scope';
-import {EvalFailure, didEvalFail} from '../eval-failure';
-import {evaluateSequence} from '../evaluator';
+import {Scope} from '../scope';
+import {EvalFailure, didEvalFail} from '../../eval-failure';
+import {evaluateSequence} from '../../evaluator';
+import { variable } from '../../../common/variable';
 
 
 /**
  * Monalisp function class. Has been named `Procedure` to disambiguate from
  * JavaScript's builtin `Function` class.
  */
-export class Procedure extends Callable implements ProcedureType {
+export class Procedure extends Callable {
 
   /**
    * Static factory function of `Procedure`.
    */
-  static of(closure: ScopeStackType, signature: IdentifierType[], body: TaggedReaderForm[]) {
+  static of(closure: ScopeStackType, signature: IdentifierType[], body: VarType[]) {
     return new Procedure(closure, signature, body);
   }
 
   constructor(
     public closure: ScopeStackType,
     public signature: IdentifierType[],
-    public body: TaggedReaderForm[]
+    public body: VarType[]
   ) { super(); }
 
-  /**
-   * Call this `Procedure` with given *scope* and *parameters*.
-   */
-  call(scope: ScopeStackType, parameters: TaggedReaderForm[]) {
+  get shouldEvaluateParameters() {
+    return true;
+  }
+
+  call(_, list: ListVar) {
     // Ensure parameters is less than arity
     const arity = this.signature.length;
+    const parameters = list.expr;
     const parameterLength = parameters.length;
     if (parameterLength > arity) {
-      const message = `Too many parameters. Expected ${arity}, got `
-                    + `${parameterLength}`;
-      return EvalFailure.of(message);
-    }
-    
-    // Evaluate given *parameters*
-    const evaluatedParameters = evaluateSequence(scope, parameters);
-    if (didEvalFail(evaluatedParameters)) {
-      return evaluatedParameters;
+      return EvalFailure.of(
+        `Too many parameters. Expected ${arity}, got ${parameterLength}`
+      );
     }
 
-    // Bind *evaluatedParameters* to *this.signature*
-    const parameterList = Scope.of(zip(this.signature, evaluatedParameters));
+    // Bind parameters to new top level scope
+    const parameterList = Scope.of(zip(this.signature, parameters));
     const closure = this.closure.push(parameterList);
     if (parameterLength < arity) {
       const signature = this.signature.slice(parameterLength);
-      const {body} = this;
-      return Procedure.of(closure, signature, body);
+      return variable(Procedure.of(closure, signature, this.body), list.src);
     }
 
     // Sequentially execute forms in *this.body* with *closure*

@@ -10,25 +10,25 @@ import {Keyword} from './keyword';
 /**
  * Enumeration of possible form types.
  */
-export enum FormFlag {
-  Nil         = 0o1,
-  Boolean     = 0o2,
-  Number      = 0o4,
-  String      = 0o10,
-  Identifier  = 0o20,
-  Keyword     = 0o40,
-  List        = 0o100,
-  Dictionary  = 0o200,
-  Procedure   = 0o400,
-  Any         = 0o777
+export const FormFlag: FormFlagType = {
+  Nil         : 0o1,
+  Boolean     : 0o2,
+  Number      : 0o4,
+  String      : 0o10,
+  Identifier  : 0o20,
+  Keyword     : 0o40,
+  List        : 0o100,
+  Dictionary  : 0o200,
+  Callable    : 0o400,
+  Any         : 0o777
 }
 
 
 /**
  * Return `FormFlag` of given *form*.
  */
-export const formFlagOf = (form: FormType) => (
-    (form === null) ? FormFlag.Nil
+export const formFlagOf = <T extends FormType>(form: FormType): FormFlagOf<T> => (
+  ((form === null) ? FormFlag.Nil
   : (form instanceof Identifier) ? FormFlag.Identifier
   : (form instanceof Keyword) ? FormFlag.Keyword
   : (Array.isArray(form)) ? FormFlag.List
@@ -36,7 +36,7 @@ export const formFlagOf = (form: FormType) => (
   : (typeof form === 'boolean') ? FormFlag.Boolean
   : (typeof form === 'number') ? FormFlag.Number
   : (typeof form === 'string') ? FormFlag.String
-  : FormFlag.Procedure
+  : FormFlag.Callable) as FormFlagOf<T>
 );
 
 
@@ -89,7 +89,7 @@ export const formFlagName = (flag: number) => {
   if (flag & FormFlag.Dictionary) {
     names.push('Dictionary');
   }
-  if (flag & FormFlag.Procedure) {
+  if (flag & FormFlag.Callable) {
     names.push('Procedure');
   }
   return names.join(' | ');

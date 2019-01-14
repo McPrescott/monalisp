@@ -6,12 +6,16 @@
 import {last} from '../../~hyfns/list';
 
 
+type IdAndVar = [IdentifierType, VarType];
+type StringAndVar = [string, VarType];
+
+
 /**
  * Return list where `Identifier` is replaced with its name property in each
  * tuple.
  */
 const nameOfIDs = (
-  (entries: Iterable<[IdentifierType, EvalForm]>): [string, EvalForm][] => {
+  (entries: Iterable<IdAndVar>): StringAndVar[] => {
     let result = [];
     for (const entry of entries) {
       result.push([entry[0].name, entry[1]]);
@@ -30,12 +34,12 @@ export class Scope implements ScopeType {
   /**
    * Static factory function of `Scope`.
    */
-  static of(entries?: Iterable<[IdentifierType, EvalForm]>): ScopeType {
+  static of(entries?: Iterable<IdAndVar>): ScopeType {
     return new Scope(entries);
   }
 
-  private table: Map<string, EvalForm>;
-  constructor(entries?: Iterable<[IdentifierType, EvalForm]>) {
+  private table: Map<string, VarType>;
+  constructor(entries?: Iterable<IdAndVar>) {
     this.table = (entries) ? new Map(nameOfIDs(entries)) : new Map();
   }
 
@@ -43,11 +47,11 @@ export class Scope implements ScopeType {
     return this.table.size;
   }
 
-  resolve(id: IdentifierType): EvalForm {
+  resolve(id: IdentifierType): VarType {
     return this.table.get(id.name);
   }
 
-  define(id: IdentifierType, value: EvalForm): EvalForm {
+  define(id: IdentifierType, value: VarType): VarType {
     this.table.set(id.name, value);
     return value;
   }
@@ -88,7 +92,7 @@ export class ScopeStack implements ScopeStackType {
     return ScopeStack.of(this.stack.slice(0, -1));
   };
   
-  resolve(id: IdentifierType): EvalForm {
+  resolve(id: IdentifierType): VarType {
     for (let i=this.stack.length-1; i>=0; i--) {
       const scope = this.stack[i];
       if (scope.isDefined(id)) {
@@ -98,7 +102,7 @@ export class ScopeStack implements ScopeStackType {
     return null;
   };
   
-  define(id: IdentifierType, value: EvalForm): EvalForm {
+  define(id: IdentifierType, value: VarType): VarType {
     return last(this.stack).define(id, value);
   };
   

@@ -4,14 +4,14 @@
 
 
 import {isDefined, not} from '../../~hyfns/logic';
-import {Identifier} from '../../common/identifier';
+import {vlift} from '../../common/variable';
+import {isNotIdentifier} from '../../common/variable-type-guards';
 import {FormFlag as Flag} from '../../common/form-flag';
-import {stripExpression} from '../misc';
 import {EvalFailure, didEvalFail} from '../eval-failure';
 import {evaluate} from '../evaluator';
-import {Signature} from '../type/signature';
-import {Procedure} from '../type/procedure';
-import {SpecialForm, ParameterKind} from '../type/special-form';
+import {Signature} from '../type/functions/signature';
+import {Procedure} from '../type/functions/procedure';
+import {SpecialForm, ParameterKind} from '../type/functions/special-form';
 
 
 const {Optional, Rest} = ParameterKind;
@@ -22,12 +22,11 @@ const {Optional, Rest} = ParameterKind;
  */
 export const def = SpecialForm.of(
   Signature.of(['id', Flag.Identifier], ['form', Flag.Any]),
-  (scope, [taggedId, taggedForm]: [TaggedIdentifierType, TaggedReaderForm]) => {
-    const form = evaluate(scope, taggedForm);
+  (env, id: IdentifierVar, vForm: VarType) => {
+    const form = evaluate(env, vForm);
     if (didEvalFail(form))
       return form;
-    const id = taggedId.expression;
-    return scope.define(id, form);
+    return env.define(id.expr, form);
   }
 );
 
@@ -37,18 +36,16 @@ export const def = SpecialForm.of(
  */
 export const fn = SpecialForm.of(
   Signature.of(['args', Flag.List], ['exprs', Flag.Any, Rest]),
-  (scope, [args, exprs]: [TaggedReaderListType, TaggedReaderListType[]]) => {
+  (env, args: ListVar, ...exprs: ListVar[]) => {
     const arglist: IdentifierType[] = []
-    for (const taggedId of args.expression) {
-      const id = taggedId.expression;
-      if (!(id instanceof Identifier)) {
-        const {info} = taggedId;
+    for (const id of args.expr) {
+      if (isNotIdentifier(id)) {
         const message = `Function argument lists must be an Identifier.`;
-        return EvalFailure.of(message, info);
+        return EvalFailure.of(message, id.src);
       }
-      arglist.push(id);
+      arglist.push(id.expr);
     }
-    return Procedure.of(scope, arglist, exprs);
+    return vlift(Procedure.of(env, arglist, exprs));
   }
 );
 
@@ -58,9 +55,7 @@ export const fn = SpecialForm.of(
  */
 export const quote = SpecialForm.of(
   Signature.of(['form', Flag.Any]),
-  (scope, [form]: [TaggedReaderForm]) => (
-    stripExpression(form)
-  )
+  (_, form: VarType) => form
 );
 
 
@@ -73,19 +68,18 @@ export const if_ = SpecialForm.of(
     ['true-branch', Flag.Any],
     ['false-branch', Flag.Any, Optional]
   ),
-  (scope, params: [TaggedReaderForm, TaggedReaderForm, TaggedReaderForm?]) => {
-    const [cond, trueBranch, falseBranch] = params;
-    const condResult = evaluate(scope, cond);
+  (env, cond: VarType, trueBranch: VarType, falseBranch: VarType) => {
+    const condResult = evaluate(env, cond);
     if (didEvalFail(condResult)) {
       return condResult
     }
-    else if (condResult) {
-      return evaluate(scope, trueBranch);
+    else if (condResult.expr) {
+      return evaluate(env, trueBranch);
     }
     else {
       return (isDefined(falseBranch))
-        ? evaluate(scope, falseBranch)
-        : null;
+        ? evaluate(env, falseBranch)
+        : vlift(null);
     }
   }
 );
@@ -96,11 +90,11 @@ export const if_ = SpecialForm.of(
  */
 export const and = SpecialForm.of(
   Signature.of(['forms', Flag.Any, Rest]),
-  (scope, [forms]: [TaggedReaderForm[]]) => {
-    let result: EvalResult = null;
+  (scope, ...forms) => {
+    let result: EvalResult = vlift(null);
     for (const form of forms) {
       result = evaluate(scope, form);
-      if (didEvalFail(result) || not(result)) {
+      if (didEvalFail(result) || not(result.expr)) {
         return result;
       }
     }
@@ -114,11 +108,11 @@ export const and = SpecialForm.of(
  */
 export const or = SpecialForm.of(
   Signature.of(['forms', Flag.Any, Rest]),
-  (scope, [forms]: [TaggedReaderForm[]]) => {
-    let result: EvalResult = null;
+  (scope, ...forms) => {
+    let result: EvalResult = vlift(null);
     for (const form of forms) {
       result = evaluate(scope, form);
-      if (didEvalFail(result) || Boolean(result)) {
+      if (didEvalFail(result) || Boolean(result.expr)) {
         return result;
       }
     }

@@ -8,6 +8,8 @@
  * cetera.
  */
 export abstract class Callable implements CallableType {
-  abstract call(scope: ScopeStackType, parameters: TaggedReaderForm[]): 
-  EvalResult<EvalForm>;
+
+  abstract get shouldEvaluateParameters(): boolean;
+
+  abstract call(scope: ScopeStackType, parameters: ListVar): EvalResult<VarType>;
 }

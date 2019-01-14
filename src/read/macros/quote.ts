@@ -14,7 +14,7 @@ import {readerFormParser} from '../s-expression';
  * Return `Tagged<Identifier>` with given `CharStream` *info*.
  */
 const quoteVar = (state: CharStream.State) => (
-  variable(getIdentifier('quote'), state, Type.Identifier)
+  variable(getIdentifier('quote'), state)
 );
 
 

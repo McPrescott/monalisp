@@ -11,13 +11,13 @@ export class EvalFailure implements EvalFailureType {
   /**
    * Static factory function for `EvalFailure`.
    */
-  static of(message: string, info?: CharStream.Info, trace?: StackTraceType): EvalFailureType {
-    return new EvalFailure(message, info, trace);
+  static of(message: string, src?: CharStream.State, trace?: StackTraceType): EvalFailureType {
+    return new EvalFailure(message, src, trace);
   };
 
   constructor(
     public message: string, 
-    public info?: CharStream.Info, 
+    public src?: CharStream.State, 
     public trace?: StackTraceType
   ) {};
 

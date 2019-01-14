@@ -6,11 +6,11 @@
 // TODO: Auto-curry when number of parameters is less than arity
 
 
-import {apply} from '../../~hyfns';
-import {didEvalFail} from '../eval-failure';
+import {apply} from '../../../~hyfns';
+import {didEvalFail} from '../../eval-failure';
 import {Callable} from './callable';
-import {bind} from './bind';
-import {Signature, verifyArity, typeCheck, transform} from './signature';
+import {evalChain} from '../bind';
+import {Signature, verifyArity, typeCheck} from './signature';
 
 
 export enum ParameterKind {
@@ -22,25 +22,18 @@ export enum ParameterKind {
 
 
 /**
- * List of parameters after application to `Signature`.
- */
-type ParameterList = (TaggedReaderForm | TaggedReaderForm[])[];
-
-
-/**
  * Function body of a `SpecialForm`.
  */
-type Body = (scope: ScopeStackType, parameters: ParameterList) => (
+type Body = (scope: ScopeStackType, ...parameters: VarType[]) => (
   EvalResult
 );
-
 
 
 
 /**
  * Monalisp's `SpecialForm` class.
  */
-export class SpecialForm extends Callable implements SpecialFormType {
+export class SpecialForm extends Callable {
 
   /**
    * Static factory function of `SpecialForm`.
@@ -53,15 +46,18 @@ export class SpecialForm extends Callable implements SpecialFormType {
     super();
   }
 
-  call(scope: ScopeStackType, parameters: TaggedReaderForm[]) {
-    const parameterList = apply(parameters, bind(
+  get shouldEvaluateParameters() {
+    return false;
+  }
+
+  call(scope: ScopeStackType, parameters: ListVar) {
+    const parameterList = apply(parameters.expr, evalChain(
       verifyArity(this.signature),
-      typeCheck(this.signature),
-      transform(this.signature)
+      typeCheck(this.signature)
     ));
     if (didEvalFail(parameterList)) {
       return parameterList
     }
-    return this.body(scope, parameterList);
+    return this.body(scope, ...parameterList);
   }
 }

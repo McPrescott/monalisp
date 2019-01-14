@@ -4,8 +4,9 @@
 
 
 import {FormFlag} from '../../common/form-flag';
-import {Signature, ParameterKind} from '../type/signature';
-import {BuiltinProcedure as Builtin} from '../type/builtin';
+import {vlift, withForms} from '../../common/variable';
+import {Signature, ParameterKind} from '../type/functions/signature';
+import {BuiltinProcedure as Builtin} from '../type/functions/builtin';
 
 
 // -- Constants ----------------------------------------------------------------
@@ -23,99 +24,51 @@ export const NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 
 const {Rest} = ParameterKind;
 
-
-const numberListSignature = Signature.of(['numbers', FormFlag.Number, Rest]);
+const variadicSignature = Signature.of(['numbers', FormFlag.Number, Rest]);
 const nullarySignature = Signature.of();
 const unarySignature = Signature.of(['x', FormFlag.Number]);
 const binarySignature = Signature.of(
-  ['x', FormFlag.Number], ['y', FormFlag.Number]
+  ['x1', FormFlag.Number], ['x2', FormFlag.Number]
 );
-
 
 const nullary = (fn: () => number) => (
-  Builtin.of(nullarySignature, fn)
+  Builtin.of(nullarySignature, (_) => vlift(fn()))
 );
 
-
-/**
- * Create unary builtin math function.
- */
 const unary = (fn: (x: number) => number) => (
-  Builtin.of(unarySignature, fn)
+  Builtin.of(unarySignature, (_, vx) => vlift(fn(vx.expr as number)))
 );
 
-
-/**
- * Create binary builtin math function.
- */
 const binary = (fn: (x: number, y: number) => number) => (
-  Builtin.of(binarySignature, fn)
-);
-
-
-/**
- * Builtin addition procedure.
- */
-export const add = Builtin.of(
-  numberListSignature,
-  ([sum=0, ...numbers]: [number, ...number[]]) => {
-    for (const n of numbers)
-      sum += n;
-    return sum;
-  }
-);
-
-
-/**
- * Builtin subtraction function.
- */
-export const subtract = Builtin.of(
-  numberListSignature,
-  ([difference=0, ...numbers]: [number, ...number[]]) => {
-    for (const n of numbers)
-      difference -= n;
-    return difference;
-  }
-);
-
-
-/**
- * Builtin multiplication function.
- */
-export const multiply = Builtin.of(
-  numberListSignature,
-  ([product=1, ...numbers]: [number, ...number[]]) => {
-    for (const n of numbers)
-      product *= n;
-    return product;
-  }
-);
-
-
-/**
- * Builtin division function.
- */
-export const divide = Builtin.of(
-  numberListSignature,
-  ([quotient=1, ...numbers]: [number, ...number[]]) => {
-    for (const n of numbers)
-      quotient /= n;
-    return quotient;
-  }
-);
-
-
-/**
- * Builtin modulo function.
- */
-export const modulo = Builtin.of(
-  Signature.of(['dividend', FormFlag.Number], ['divisor', FormFlag.Number]),
-  (dividend: number, divisor: number) => (
-    dividend % divisor
+  Builtin.of(binarySignature, (_, vx, vy) => 
+    vlift(fn(vx.expr as number, vy.expr as number))
   )
 );
 
+const variadic = (fn: (...n: number[]) => number) => (
+  Builtin.of(variadicSignature, (_, ...vars) => vlift(withForms(fn)(...vars)))
+)
 
+
+// -- Basic Maths --------------------------------------------------------------
+
+export const add = variadic((sum=0, ...numbers) => 
+  numbers.reduce((sum, n) => sum + n, sum)
+);
+
+export const subtract = variadic((difference=0, ...numbers) => 
+  numbers.reduce((difference, n) => difference - n, difference)
+);
+
+export const multiply = variadic((product=1, ...numbers) => 
+  numbers.reduce((product, n) => product * n, product)
+);
+
+export const divide = variadic((quotient=1, ...numbers) => 
+  numbers.reduce((quotient, n) => quotient / n, quotient)
+);
+
+export const modulo = binary((x, y) => x % y);
 export const abs = unary(Math.abs);
 export const round = unary(Math.round);
 export const floor = unary(Math.floor);
@@ -138,7 +91,4 @@ export const tan = unary(Math.tan);
 export const tanh = unary(Math.tanh);
 export const atan = unary(Math.atan);
 export const atanh = unary(Math.atanh);
-export const atan2 = Builtin.of(
-  Signature.of(['y', FormFlag.Number], ['x', FormFlag.Number]),
-  Math.atan2
-);
+export const atan2 = binary(Math.atan2)

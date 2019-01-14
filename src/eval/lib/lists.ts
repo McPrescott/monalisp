@@ -4,9 +4,9 @@
 
 
 import {FormFlag as Type} from '../../common/form-flag';
+import {withForms} from '../../common/variable';
 import {Signature, ParameterKind as Kind} from '../type/signature';
-import {BuiltinProcedure as Builtin} from '../type/builtin';
-import {SpecialForm} from '../type/special-form';
+import {BuiltinProcedure as Builtin} from '../type/functions/builtin';
 
 
 /**
@@ -14,10 +14,10 @@ import {SpecialForm} from '../type/special-form';
  */
 export const get = Builtin.of(
   Signature.of(['index', Type.Number], ['list', Type.List]),
-  (index: number, list: ListType) => {
+  withForms((index: number, list: ListType) => {
     const max = list.length - 1;
     return (index >= 0 && index <= max) ? list[index] : null;
-  }
+  })
 );
 
 
@@ -26,7 +26,7 @@ export const get = Builtin.of(
  */
 export const len = Builtin.of(
   Signature.of(['list', Type.List]),
-  (list: ListType) => list.length
+  withForms((list: ListType) => list.length)
 );
 
 
@@ -35,7 +35,15 @@ export const len = Builtin.of(
  */
 export const concat = Builtin.of(
   Signature.of(['lists', Type.List, Kind.Rest]),
-  ([head, ...tail]: [...ListType[]]) => (
+  (head: ListType, ...tail: ListType[]) => (
     (head) ? head.concat(...tail) : null
   )
 );
+
+
+export const map = Builtin.of(
+  Signature.of(['list', Type.List], ['fn', Type.Callable]),
+  withForms((list: ListType, fn: CallableType) => (
+    list.map(expr => fn.call(expr))
+  ))
+)

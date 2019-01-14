@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 
 
-import {EvalFailure, didEvalFail} from '../eval-failure';
+import {didEvalFail} from '../eval-failure';
 
 
 /**
@@ -11,21 +11,19 @@ import {EvalFailure, didEvalFail} from '../eval-failure';
  * argument the return value of the previous function, unless that value is of
  * type `EvalFailure`, in which case the failure is returned immediately.
  */
-export const bind: Bind = (first, ...rest) => (
-  (...args) => {
-    let result = first(...args);
-    if (didEvalFail(result)) {
-      return result;
-    }
-    for (const fn of rest) {
-      result = fn(result);
-      if (didEvalFail(result)) {
-        return result;
-      }
-    }
-    return result;
-  }
+export const evalChain: Bind = (leadFn, ...fns) => (
+  (...args) => fns.reduce(evalBind, leadFn(...args))
 );
+
+
+/**
+ * Monadic bind for the sum type of `T | EvalFailure`, short-circuiting function
+ * execution upon encountering a failure.
+ */
+export const evalBind = <T, U>(result: EvalResult<T>, fn: (x: T) => U) => (
+  (didEvalFail(result)) ? result : fn(result)
+);
+
 
 
 type ExcludeEvalFailure<T> = Exclude<T, EvalFailureType>;

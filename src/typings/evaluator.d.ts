@@ -5,14 +5,14 @@
 
 interface EvalFailureType {
   message: string;
-  info?: CharStream.Info;
+  src?: CharStream.State;
   trace?: StackTraceType;
 }
 
 
-type EvalResult<T=VariableType> = T | EvalFailureType;
+type EvalResult<T=VarType> = T | EvalFailureType;
 
 
-interface EvalFn<T=VariableType, U=VariableType> {
+interface EvalFn<T=VarType, U=VarType> {
   (scope: ScopeStackType, form: T): EvalResult<U>;
 }

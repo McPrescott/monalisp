@@ -21,7 +21,7 @@ export const execute = (code: string) => {
   const parsedForms = read(code);
   if (didParseFail(parsedForms))
     throw new SyntaxError(parsedForms.toString());
-  let result: EvalResult<EvalForm>;
+  let result: EvalResult<VarType>;
   for (const form of parsedForms) {
     result = evaluate(global, form);
     if (didEvalFail(result))

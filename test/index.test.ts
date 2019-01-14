@@ -11,10 +11,11 @@ import {pprint} from '../src/util';
 
 const execIt = (source: string, expect: any) => {
   it(`Exec: ${source} = ${expect}`, () => {
-    const result = execute(source);
+    let result: any = execute(source);
     if (didEvalFail(result)) {
       throw new EvalError(result.toString());
     }
+    result = result.expr;
     if (expect instanceof Function) {
       assert(expect(result), `${result} failed assertion`);
     }
@@ -96,7 +97,7 @@ describe('Monalisp', () => {
 
   describeExec('Conditionals',
     '(if true (def x 5) (def x -100)) \
-    (if nil (def y -100) (def y 5)) \
+    (if nil (def y 100) (def y 5)) \
     (+ x y)', 10
   );
 

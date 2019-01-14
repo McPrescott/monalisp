@@ -4,6 +4,7 @@
 
 
 import {getIdentifier} from '../common/identifier';
+import {vlift} from '../common/variable';
 import {Scope, ScopeStack} from './type/scope';
 import * as specialForms from './lib/special-forms';
 import * as math from './lib/math';
@@ -15,8 +16,8 @@ const globalScope = Scope.of();
 /**
  * Define *form* as *name* in global scope.
  */
-const def = (name: string, form: EvalForm) => (
-  globalScope.define(getIdentifier(name), form)
+const def = (name: string, form: FormType) => (
+  globalScope.define(getIdentifier(name), vlift(form))
 );
 
 

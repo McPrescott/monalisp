@@ -3,10 +3,9 @@
 //------------------------------------------------------------------------------
 
 
-import {curry} from '../../~hyfns';
-import {FormFlag, formFlagOf as evalFormFlagOf, formFlagName, isNotTypeMatch} from '../../common/form-flag';
-import {ReaderTag} from '../../read/tagging';
-import {EvalFailure, didEvalFail} from '../eval-failure';
+import {curry} from '../../../~hyfns';
+import {FormFlag, formFlagName, isNotTypeMatch} from '../../../common/form-flag';
+import {EvalFailure} from '../../eval-failure';
 
 
 export enum ParameterKind {
@@ -34,7 +33,7 @@ type ParameterDescriptor = {
 
 
 /**
- * Convery short-hand `Parameter` to `ParameterDescriptor`.
+ * Convert short-hand `Parameter` to `ParameterDescriptor`.
  */
 const descriptorFrom = (
   (parameter: Parameter|ParameterDescriptor): ParameterDescriptor => (
@@ -54,7 +53,7 @@ const descriptorFrom = (
 
 
 /**
- * Represents the signature of a `SpecialForm`
+ * Represents the signature of `SpecialForm` or `BuiltinProcedure`.
  */
 export class Signature {
   
@@ -126,7 +125,7 @@ export class Signature {
  * arity are provided.
  */
 export const verifyArity: VerifyArity = curry(
-  ({maxArity}: Signature, parameters: TaggedReaderForm[]) => {
+  ({maxArity}: Signature, parameters: VarType[]) => {
     const parameterLength = parameters.length;
     if (parameterLength > maxArity) {
       const message = `Too many parameters. Expected at most ${maxArity}, `
@@ -138,44 +137,31 @@ export const verifyArity: VerifyArity = curry(
 );
 
 interface VerifyArity {
-  (signature: Signature, parameters: TaggedReaderForm[]):
-    EvalResult<TaggedReaderForm[]>;
+  (signature: Signature, parameters: VarType[]):
+    EvalResult<VarType[]>;
   
-  (signature: Signature): (parameters: TaggedReaderForm[]) =>
-    EvalResult<TaggedReaderForm[]>;
+  (signature: Signature): (parameters: VarType[]) =>
+    EvalResult<VarType[]>;
 }
-
-
-/**
- * Return form flag of given *form*.
- */
-const formFlagOf = (form: TaggedReaderForm|EvalForm) => (
-  (form instanceof ReaderTag)
-    ? form.type
-    : evalFormFlagOf(form as EvalForm)
-)
 
 
 /**
  * Verify that the types of the provided *parameters* match given *signature*.
  */
 export const typeCheck: TypeCheck = curry(
-  <T extends TaggedReaderForm[] | EvalForm[]>
+  <T extends VarType[]>
   ({spec}: Signature, parameters: T): EvalResult<T> => {
     for (let i=0; i<parameters.length; i++) {
       const parameter = parameters[i];
-      const parameterType = formFlagOf(parameter);
+      const {type} = parameter;
       const {name, type: expectedType} = spec[Math.min(i, spec.length-1)];
-      if (isNotTypeMatch(parameterType, expectedType)) {
-        let info: CharStream.Info;
-        if (parameter instanceof ReaderTag) {
-          info = parameter.info;
-        }
+      if (isNotTypeMatch(type, expectedType)) {
+        const {src} = parameter; 
         const expectedTypeName = formFlagName(expectedType);
-        const givenTypeName = formFlagName(parameterType);
+        const givenTypeName = formFlagName(type);
         const message = `Incorrect type for "${name}" parameter. Expected` 
                       + `${expectedTypeName}, got ${givenTypeName}.`;
-        return EvalFailure.of(message, info);
+        return EvalFailure.of(message, src);
       }
     }
     return parameters;
@@ -183,33 +169,33 @@ export const typeCheck: TypeCheck = curry(
 );
 
 interface TypeCheck {
-  <T extends TaggedReaderForm|EvalForm>(signature: Signature, parameters: T[]): EvalResult<T[]>;
-  (signature: Signature): <T extends TaggedReaderForm|EvalForm>(parameters: T[]) => EvalResult<T[]>;
+  <T extends VarType[]>(signature: Signature, parameters: T): EvalResult<T>;
+  (signature: Signature): <T extends VarType[]>(parameters: T) => EvalResult<T>;
 }
 
 
-/**
- * Transform argument list for either `SpecialForm` or `BuiltinProcedure`.
- */
-export const transform: Transform = curry(
-  <T extends TaggedReaderForm | EvalForm>
-  ({spec}: Signature, parameters: T[]): (T | T[])[] => {
-    const parameterList: (T | T[])[] = [];
-    for (let i=0; i<parameters.length; i++) {
-      const kind = spec[i].kind;
-      if (kind !== ParameterKind.Rest) {
-        parameterList.push(parameters[i]);
-      }
-      else {
-        parameterList.push(parameters.slice(i));
-        break;
-      }
-    }
-    return parameterList;
-  }
-);
+// /**
+//  * Transform argument list for either `SpecialForm` or `BuiltinProcedure`.
+//  */
+// export const transform: Transform = curry(
+//   <T extends TaggedReaderForm | EvalForm>
+//   ({spec}: Signature, parameters: T[]): (T | T[])[] => {
+//     const parameterList: (T | T[])[] = [];
+//     for (let i=0; i<parameters.length; i++) {
+//       const kind = spec[i].kind;
+//       if (kind !== ParameterKind.Rest) {
+//         parameterList.push(parameters[i]);
+//       }
+//       else {
+//         parameterList.push(parameters.slice(i));
+//         break;
+//       }
+//     }
+//     return parameterList;
+//   }
+// );
 
-interface Transform {
-  <T extends TaggedReaderForm|EvalForm>(signature: Signature, parameters: T[]): (T | T[])[];
-  (signature: Signature): <T extends TaggedReaderForm|EvalForm>(parameters: T[])=> (T | T[])[];
-}
+// interface Transform {
+//   <T extends TaggedReaderForm|EvalForm>(signature: Signature, parameters: T[]): (T | T[])[];
+//   (signature: Signature): <T extends TaggedReaderForm|EvalForm>(parameters: T[])=> (T | T[])[];
+// }

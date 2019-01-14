@@ -3,10 +3,13 @@
 //------------------------------------------------------------------------------
 
 
+import {curry} from '../~hyfns';
 import {head, tail} from '../~hyfns/list';
 import {FormFlag} from '../common/form-flag';
+import {variableFrom} from '../common/variable';
+import {isNotCallable} from '../common/variable-type-guards';
 import {EvalFailure, didEvalFail} from './eval-failure';
-import {Callable} from './type/callable';
+
 
 
 /**
@@ -15,15 +18,15 @@ import {Callable} from './type/callable';
 export const evaluate: EvalFn = (scope, form) => {
   switch (form.type) {
     case FormFlag.Identifier:
-      return evalIdentifier(scope, form as TaggedIdentifierType);
+      return evalIdentifier(scope, form);
     case FormFlag.List:
-      return evalList(scope, form as TaggedReaderListType);
+      return evalList(scope, form);
     case FormFlag.Dictionary:
-      return evalDictionary(scope, form as TaggedReaderDictionaryType);
+      return evalDictionary(scope, form);
     default:
-      return evalPrimitive(scope, form as TaggedPrimitive);
+      return evalPrimitive(scope, form);
   }
-}
+};
 
 
 /**
@@ -31,18 +34,16 @@ export const evaluate: EvalFn = (scope, form) => {
  * itself. Primitive forms are: `nil`, `boolean`, `number`, `string` and
  * `Keyword`.
  */
-export const evalPrimitive: EvalFn<TaggedPrimitive, Primitive> = (
-  (_, form) => (
-    form.expression
-  )
+export const evalPrimitive: EvalFn = (
+  (_, form) => form
 );
 
 
 /**
  * Evaluates `Identifier` by resolving its value from given *scope*.
  */
-export const evalIdentifier: EvalFn<TaggedIdentifierType> = (scope, id) => (
-  scope.resolve(id.expression)
+export const evalIdentifier: EvalFn<IdentifierVar> = (scope, id) => (
+  scope.resolve(id.expr)
 );
 
 
@@ -50,23 +51,31 @@ export const evalIdentifier: EvalFn<TaggedIdentifierType> = (scope, id) => (
  * Evaluates `List` by invoking the first element of *taggedList* as a
  * `Procedure`, with the subsequent elements as its arguments.
  */
-export const evalList: EvalFn<TaggedReaderListType> = (scope, taggedList) => {
+export const evalList: EvalFn<ListVar> = (scope, varList) => {
   // Retrieve procedure (first element) from expression
-  const list = taggedList.expression;
+  const list = varList.expr;
   const fn = evaluate(scope, head(list));
   if (didEvalFail(fn)) {
     return fn;
   }
 
   // Ensure fn is derrived from `Callable`
-  if (!(fn instanceof Callable)) {
-    const {info} = taggedList;
+  if (isNotCallable(fn)) {
+    const {src} = varList;
     const message = `Cannot invoke ${fn} as a procedure.`
-    return EvalFailure.of(message, info);
+    return EvalFailure.of(message, src);
   }
 
-  // Call `Callable` instance with subsequent elements of *list*
-  return fn.call(scope, tail(list));
+  // Call function, evaluating parameters if necessary
+  const callable = fn.expr;
+  let parameters = tail(list);
+  if (callable.shouldEvaluateParameters) {
+    const evaluatedParameters = evaluateSequence(scope, tail(list))
+    if (didEvalFail(evaluatedParameters))
+      return evaluatedParameters;
+    parameters = evaluatedParameters
+  }
+  return callable.call(scope, variableFrom(parameters, varList) as ListVar);
 };
 
 
@@ -74,10 +83,10 @@ export const evalList: EvalFn<TaggedReaderListType> = (scope, taggedList) => {
  * Evaluates `Dictionary` by sequentially evaluating each of its key, value
  * pairs respectively.
  */
-export const evalDictionary: EvalFn<TaggedReaderDictionaryType, DictionaryType> = (
-  (scope, taggedDictionary) => {
+export const evalDictionary: EvalFn<DictionaryVar, DictionaryVar> = (
+  (scope, dictionary) => {
     let result: DictionaryType;
-    for (let [taggedKey, taggedValue] of taggedDictionary.expression) {
+    for (let [taggedKey, taggedValue] of dictionary.expr) {
       // Evaluate *key*
       let key = evaluate(scope, taggedKey);
       if (didEvalFail(key)) {
@@ -93,7 +102,7 @@ export const evalDictionary: EvalFn<TaggedReaderDictionaryType, DictionaryType> 
       // Add *key*, *value* pair to *result*
       result.set(key, value);
     }
-    return result;
+    return variableFrom(result, dictionary) as DictionaryVar;
   }
 );
 
@@ -106,9 +115,9 @@ export const evalDictionary: EvalFn<TaggedReaderDictionaryType, DictionaryType> 
  * Evaluates *sequence* of reader forms, returning `EvalFailure` immediately
  * upon failure, or an `EvalForm[]` upon success.
  */
-export const evaluateSequence = (
-  (scope: ScopeStackType, sequence: TaggedReaderForm[]) => {
-    const results: EvalForm[] = [];
+export const evaluateSequence = curry(
+  (scope: ScopeStackType, sequence: VarType[]) => {
+    const results: VarType[] = [];
     for (const form of sequence) {
       const result = evaluate(scope, form);
       if (didEvalFail(result))

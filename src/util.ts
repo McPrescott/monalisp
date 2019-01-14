@@ -7,7 +7,6 @@ import {curry} from './~hyfns/index';
 import {Keyword} from './common/keyword';
 import {Identifier} from './common/identifier';
 import {ParseFailure} from './read/parse/parser';
-import {ReaderTag} from './read/tagging';
 
 
 // -- Builtin Extensions -------------------------------------------------------
@@ -52,7 +51,7 @@ export const quote = (str: string) => `"${str}"`;
 
 
 export const pprint = (arg: any): string => {
-  if (arg instanceof ReaderTag) {
+  if ('expr' in arg) {
     return pprint(arg.expression);
   }
   else if (Array.isArray(arg)) {
