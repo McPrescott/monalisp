@@ -14,9 +14,7 @@ import {Signature, verifyArity, typeCheck} from './signature';
 /**
  * Body of a `BuiltinProcedure`.
  */
-type Body = (
-  (env: ScopeStackType, ...paramters: VarType[]) => EvalResult<VarType>
-);
+type Body = (env: ScopeStackType, ...paramters: VarType[]) => EvalResult;
 
 
 /**

@@ -5,29 +5,45 @@ import {Identifier} from '../src/common/identifier';
 import {didParseFail} from '../src/read/parse/parser';
 import {read, evaluate, execute} from '../src/main';
 import {didEvalFail} from '../src/eval/eval-failure';
-import {pprint} from '../src/util';
+import {pprintValues} from '../src/util';
 
+
+const extractForm = ({expr}: any) => (
+  (Array.isArray(expr)) ? expr.map(extractForm)
+  : (expr instanceof Map) ? extractFormFromMap(expr)
+  : expr
+);
+
+
+const extractFormFromMap = (form: Map<any, any>) => {
+  const map = new Map();
+  for (const [key, value] of form) {
+    map.set(key, value);
+  }
+  return map;
+}
 
 
 const execIt = (source: string, expect: any) => {
-  it(`Exec: ${source} = ${expect}`, () => {
-    let result: any = execute(source);
+  it(`${source} = ${pprintValues(expect)}`, () => {
+    const result = execute(source);
     if (didEvalFail(result)) {
       throw new EvalError(result.toString());
     }
-    result = result.expr;
+
+    const form = extractForm(result);
     if (expect instanceof Function) {
-      assert(expect(result), `${result} failed assertion`);
+      assert(expect(form), `${form} failed assertion`);
     }
     else {
-      equals(result, expect, `${result} != ${expect}`);
+      equals(form, expect, `${pprintValues(form)} != ${pprintValues(expect)}`);
     }
   });
 };
 
 
 const readIt = (source: string, expect: any) => {
-  it(`Read: ${source} = ${pprint(expect)}`, () => {
+  it(`${source} = ${pprintValues(expect)}`, () => {
     const result = read(source);
     if (didParseFail(result))
       throw new SyntaxError(result.toString());
@@ -77,7 +93,7 @@ describe('Monalisp', () => {
   );
 
   describeExec('Random function', 
-    '(random)', (x: any) => (typeof x === 'number' && x > 0 && x < 1)
+    '(random)', (x: any) => (typeof x === 'number' && 0 < x && x < 1)
   );
 
   describeExec('Numeric Constants',
@@ -111,27 +127,98 @@ describe('Monalisp', () => {
     '(* (and 1 2 3 4) (or 0 false nil 2 100))', 8
   );
 
-  // describeExec('Identifier Definition',
-  //   '(def id 123) id', 123
-  // );
 
-  // describeExec('Addition Function',
-  //   '(def x 2) (+ x 3 4 5)', 14
-  // );
+  // -- List Primitives --------------------------------------------------------
 
-  // describeExec('Subtraction Function',
-  //   '(def x 30)(def y 8)(- x y)', 22
-  // );
+  describeExec('nth',
+    `(nth 2 '(1 2 3 4))`, 3
+  );
 
-  // describeExec('Multiplication Function',
-  //   '(def a 3)(def b 5)(* a b)', 15
-  // );
+  describeExec('len',
+    `(len '(1 2 3))`, 3
+  );
 
-  // describeExec('Division Function',
-  //   '(def t 100)(def b 2)(/ t b)', 50
-  // );
+  describeExec('cons',
+    "(cons 5 '())", [5]
+  );
 
-  // describeExec('Nested Addition & Subtration',
-  //   '(+ (+ 4 2 5) 8 (- 18 10))', 27
-  // );
+  describeExec('head',
+    "(head '(10 18 1 49))", 10
+  );
+
+  describeExec('tail',
+    "(tail '(0 1 2 3 4 5))", [1, 2, 3, 4, 5]
+  );
+
+  describeExec('last',
+    "(last '(10 20 30 40))", 40
+  );
+
+  describeExec('take',
+    `(take 2 '(1 2 3 4 5))`, [1, 2]
+  );
+
+  describeExec('takeLast',
+    `(takeLast 3 '(0 1 2 3 4))`, [2, 3, 4]
+  );
+
+  describeExec('clone',
+    `(clone '(1 2 3))`, [1, 2, 3]
+  );
+
+  describeExec('slice',
+    `(slice 1 4 '(1 2 3 4 5 6))`, [2, 3, 4]
+  );
+
+  describeExec('push',
+    "(push 10 '(5))", [5, 10]
+  );
+
+  describeExec('pop',
+    `(pop '(2 4 6 8 10))`, [2, 4, 6, 8]
+  );
+
+  describeExec('concat',
+    `(concat '(1 2 3) '(4) '(5 6))`, [1, 2, 3, 4, 5, 6]
+  );
+
+  describeExec('map',
+    `(map (fn (x) (+ 1 x)) '(1 2 3 4 5))`, [2, 3, 4, 5, 6]
+  );
+
+  describeExec('fold',
+    `(fold (fn (sum x) (+ sum x)) '(2 4 6 8 10))`, 30
+  );
+
+  describeExec('filter',
+    `(filter (fn (x) (= (% x 2) 0)) '(1 2 3 4 5))`, [2, 4]
+  );
+
+  describeExec('flatten',
+    `(flatten '(1 2 (3 4) (5) 6 7))`, [1, 2, 3, 4, 5, 6, 7]
+  );
+
+  describeExec('flatmap',
+    `(flatmap (fn (x) (ls x (+ x 1))) '(1 3))`, [1, 2, 3, 4]
+  );
+
+  describeExec('zip',
+    `(zip '(1 3 5) '(2 4 6))`, [[1, 2], [3, 4], [5, 6]]
+  );
+
+  describeExec('reverse',
+    `(reverse '(1 2 3 4 5))`, [5, 4, 3, 2, 1]
+  );
+
+  describeExec('has?',
+    `(has? 2 '(1 2 3 4))`, true
+  );
+
+  describeExec('all?',
+    `(all? (fn (x) (/= x 2)) '(1 2 3 4))`, false
+  );
+
+  describeExec('any?',
+    `(any? (fn (x) (= x 2)) '(1 2 3 4))`, true
+  );
 });

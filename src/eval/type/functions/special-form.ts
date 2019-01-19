@@ -24,9 +24,7 @@ export enum ParameterKind {
 /**
  * Function body of a `SpecialForm`.
  */
-type Body = (scope: ScopeStackType, ...parameters: VarType[]) => (
-  EvalResult
-);
+type Body = (scope: ScopeStackType, ...parameters: VarType[]) => EvalResult;
 
 
 

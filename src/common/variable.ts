@@ -71,7 +71,14 @@ export const applyForms = (
  * Return an adapted function that accepts `VarType` instead of `FormType`.
  */
 export const withForms = (
-  <T>(fn: (...forms: FormType[]) => T) => (...vars: VarType[]): T => (
-    fn(...vars.map(v => v.expr))
+  <T extends FormType[], U>
+  (fn: (...forms: T) => U) => (...vars: VarType[]): U => (
+    fn(...vars.map(v => v.expr) as T)
   )
 );
+
+
+/**
+ * Monalisp nil value.
+ */
+export const nil: NilVar = vlift(null) as NilVar;

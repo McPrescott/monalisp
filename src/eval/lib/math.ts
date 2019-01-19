@@ -31,26 +31,30 @@ const binarySignature = Signature.of(
   ['x1', FormFlag.Number], ['x2', FormFlag.Number]
 );
 
-const nullary = (fn: () => number) => (
+const nullary = (fn: () => FormType) => (
   Builtin.of(nullarySignature, (_) => vlift(fn()))
 );
 
-const unary = (fn: (x: number) => number) => (
+const unary = (fn: (x: number) => FormType) => (
   Builtin.of(unarySignature, (_, vx) => vlift(fn(vx.expr as number)))
 );
 
-const binary = (fn: (x: number, y: number) => number) => (
+const binary = (fn: (x: number, y: number) => FormType) => (
   Builtin.of(binarySignature, (_, vx, vy) => 
     vlift(fn(vx.expr as number, vy.expr as number))
   )
 );
 
-const variadic = (fn: (...n: number[]) => number) => (
+const variadic = (fn: (...n: number[]) => FormType) => (
   Builtin.of(variadicSignature, (_, ...vars) => vlift(withForms(fn)(...vars)))
-)
+);
 
 
 // -- Basic Maths --------------------------------------------------------------
+
+export const eq = binary((x, y) => x === y);
+
+export const neq = binary((x, y) => x !== y);
 
 export const add = variadic((sum=0, ...numbers) => 
   numbers.reduce((sum, n) => sum + n, sum)
