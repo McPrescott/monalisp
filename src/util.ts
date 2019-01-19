@@ -49,6 +49,32 @@ export const invertPred = curry((predicate: UnaryPred<any>, value: any) => (
 
 export const quote = (str: string) => `"${str}"`;
 
+export const parens = (str: string) => `(${str})`;
+
+export const curlys = (str: string) => `{${str}}`;
+
+export const idQuote = (str: string) => `'${str}`;
+
+export const keyQuote = (str: string) => `:${str}`;
+
+const join = (list: any[], separator=' ') => list.join(separator);
+
+const pprintMap = (map: Map<any, any>) => {
+  const mapPairs: string[] = [];
+  for (const pair of map) {
+    mapPairs.push(join(pair.map(pprintValues), ' => '));
+  }
+  return curlys(join(mapPairs, ', '));
+}
+
+export const pprintValues = (form: any): string => (
+  Array.isArray(form)? parens(join(form.map(pprintValues))):
+  form instanceof Identifier? idQuote(form.name):
+  form instanceof Keyword? keyQuote(form.key):
+  form instanceof Map? pprintMap(form):
+  form === null? 'nil':
+  form.toString()
+);
 
 export const pprint = (arg: any): string => {
   if ('expr' in arg) {
