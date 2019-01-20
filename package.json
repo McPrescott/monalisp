@@ -4,8 +4,8 @@
   "description": "Custom lisp for Monagen.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --opts mocha.conf",
-    "test:auto": "mocha --opts mocha.conf --watch"
+    "test": "mocha --opts mocha.conf --watch",
+    "test:once": "mocha --opts mocha.conf"
   },
   "repository": {
     "type": "git",
