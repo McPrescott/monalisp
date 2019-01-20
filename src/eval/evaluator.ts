@@ -62,7 +62,7 @@ export const evalList: EvalFn<ListVar> = (scope, varList) => {
   // Ensure fn is derrived from `Callable`
   if (isNotCallable(fn)) {
     const {src} = varList;
-    const message = `Cannot invoke ${fn} as a procedure.`
+    const message = `Cannot invoke ${fn.expr} as a procedure.`
     return EvalFailure.of(message, src);
   }
 
@@ -85,7 +85,7 @@ export const evalList: EvalFn<ListVar> = (scope, varList) => {
  */
 export const evalDictionary: EvalFn<DictionaryVar, DictionaryVar> = (
   (scope, dictionary) => {
-    let result: DictionaryType;
+    let result: DictionaryType = new Map();
     for (let [taggedKey, taggedValue] of dictionary.expr) {
       // Evaluate *key*
       let key = evaluate(scope, taggedKey);

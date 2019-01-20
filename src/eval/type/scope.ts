@@ -4,6 +4,7 @@
 
 
 import {last} from '../../~hyfns/list';
+import { nil } from '../../common/variable';
 
 
 type IdAndVar = [IdentifierType, VarType];
@@ -48,7 +49,7 @@ export class Scope implements ScopeType {
   }
 
   resolve(id: IdentifierType): VarType {
-    return this.table.get(id.name);
+    return this.table.get(id.name) || nil;
   }
 
   define(id: IdentifierType, value: VarType): VarType {
@@ -99,7 +100,7 @@ export class ScopeStack implements ScopeStackType {
         return scope.resolve(id);
       }
     }
-    return null;
+    return nil;
   };
   
   define(id: IdentifierType, value: VarType): VarType {

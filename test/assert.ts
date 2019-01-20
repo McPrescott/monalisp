@@ -31,8 +31,9 @@ const areMapsEqual = (output: Map<any, any>, expected: Map<any, any>) => {
     return false;
   }
   for (const [key, value] of output) {
-    if (areFormsNotEqual(value, expected.get(key)))
+    if (areFormsNotEqual(value, expected.get(key))) {
       return false;
+    }
   }
   return true;
 };

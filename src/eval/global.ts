@@ -7,6 +7,7 @@ import {getIdentifier} from '../common/identifier';
 import {vlift} from '../common/variable';
 import {Scope, ScopeStack} from './type/scope';
 import * as specialForms from './lib/special-forms';
+import * as logic from './lib/logic';
 import * as math from './lib/math';
 import * as list from './lib/lists';
 
@@ -22,7 +23,9 @@ const def = (name: string, form: FormType) => (
 );
 
 
+
 // -- Special Forms ------------------------------------------------------------
+
 
 def('def', specialForms.def);
 def('fn', specialForms.fn);
@@ -32,7 +35,25 @@ def('and', specialForms.and);
 def('or', specialForms.or);
 
 
+
+// -- Logic and Predicates -----------------------------------------------------
+
+
+def('not', logic.not)
+def('nil?', logic.isNil);
+def('bool?', logic.isBool);
+def('number?', logic.isNumber);
+def('string?', logic.isString);
+def('id?', logic.isId);
+def('key?', logic.isKey);
+def('list?', logic.isList);
+def('map?', logic.isDictionary);
+def('fn?', logic.isFn);
+
+
+
 // -- Builtin Maths ------------------------------------------------------------
+
 
 // constants
 def('PI', math.PI);
@@ -80,7 +101,9 @@ def('atanh', math.atanh);
 def('atan2', math.atan2);
 
 
+
 // -- Builtin List Primitives --------------------------------------------------
+
 
 def('ls', list.list);
 def('nth', list.nth);
