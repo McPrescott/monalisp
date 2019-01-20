@@ -9,8 +9,8 @@ import {pjoinFlat, star, pair} from './parse/parsers/combinators';
 import {satisfyRegex} from './parse/parsers/string';
 
 
-const idBegin = /[a-z+\-*/=%<>&|!?$_]|\p{Script=Greek}/iu;
-const idRest = /[a-z0-9+\-*/=%<>&|!?$_]|\p{Script=Greek}/iu;
+const idBegin = /[a-z+\-*/=<>!?_]|\p{Script=Greek}/iu;
+const idRest = /[a-z0-9+\-*/=<>!?_]|\p{Script=Greek}/iu;
 
 
 /**
