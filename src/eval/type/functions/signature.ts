@@ -172,30 +172,3 @@ interface TypeCheck {
   <T extends VarType[]>(signature: Signature, parameters: T): EvalResult<T>;
   (signature: Signature): <T extends VarType[]>(parameters: T) => EvalResult<T>;
 }
-
-
-// /**
-//  * Transform argument list for either `SpecialForm` or `BuiltinProcedure`.
-//  */
-// export const transform: Transform = curry(
-//   <T extends TaggedReaderForm | EvalForm>
-//   ({spec}: Signature, parameters: T[]): (T | T[])[] => {
-//     const parameterList: (T | T[])[] = [];
-//     for (let i=0; i<parameters.length; i++) {
-//       const kind = spec[i].kind;
-//       if (kind !== ParameterKind.Rest) {
-//         parameterList.push(parameters[i]);
-//       }
-//       else {
-//         parameterList.push(parameters.slice(i));
-//         break;
-//       }
-//     }
-//     return parameterList;
-//   }
-// );
-
-// interface Transform {
-//   <T extends TaggedReaderForm|EvalForm>(signature: Signature, parameters: T[]): (T | T[])[];
-//   (signature: Signature): <T extends TaggedReaderForm|EvalForm>(parameters: T[])=> (T | T[])[];
-// }

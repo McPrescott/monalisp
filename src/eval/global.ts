@@ -77,7 +77,6 @@ def('+', math.add);
 def('-', math.subtract);
 def('*', math.multiply);
 def('/', math.divide);
-def('%', math.modulo);
 def('mod', math.modulo);
 def('sqrt', math.sqrt);
 def('pow', math.pow);

@@ -10,6 +10,8 @@ import {EvalFailure, didEvalFail} from '../../eval-failure';
 import {evaluateSequence} from '../../evaluator';
 import { variable } from '../../../common/variable';
 
+import {Signature, verifyArity, partial, assocParams} from './common-signature';
+
 
 /**
  * Monalisp function class. Has been named `Procedure` to disambiguate from
@@ -20,13 +22,13 @@ export class Procedure extends Callable {
   /**
    * Static factory function of `Procedure`.
    */
-  static of(closure: ScopeStackType, signature: IdentifierType[], body: VarType[]) {
+  static of(closure: ScopeStackType, signature: Signature, body: VarType[]) {
     return new Procedure(closure, signature, body);
   }
 
   constructor(
     public closure: ScopeStackType,
-    public signature: IdentifierType[],
+    public signature: Signature,
     public body: VarType[]
   ) { super(); }
 
@@ -35,21 +37,19 @@ export class Procedure extends Callable {
   }
 
   call(_, list: ListVar) {
-    // Ensure parameters is less than arity
-    const arity = this.signature.length;
-    const parameters = list.expr;
-    const parameterLength = parameters.length;
-    if (parameterLength > arity) {
-      return EvalFailure.of(
-        `Too many parameters. Expected ${arity}, got ${parameterLength}`
-      );
+    const parameters = verifyArity(this.signature)(list.expr);
+    if (didEvalFail(parameters)) {
+      return parameters;
     }
 
     // Bind parameters to new top level scope
-    const parameterList = Scope.of(zip(this.signature, parameters));
+    const parameterList = Scope.of(assocParams(this.signature, parameters));
     const closure = this.closure.push(parameterList);
-    if (parameterLength < arity) {
-      const signature = this.signature.slice(parameterLength);
+    if (parameters.length < this.signature.minArity) {
+      const signature = partial(this.signature, parameters.length);
+      if (didEvalFail(signature)) {
+        return signature;
+      }
       return variable(Procedure.of(closure, signature, this.body), list.src);
     }
 
