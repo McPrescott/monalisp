@@ -5,25 +5,24 @@
 
 import {isDefined, not} from '../../~hyfns/logic';
 import {vlift} from '../../common/variable';
-import {isNotIdentifier} from '../../common/variable-type-guards';
 import {FormFlag as Type} from '../../common/form-flag';
-import {EvalFailure, didEvalFail} from '../eval-failure';
+import {didEvalFail} from '../eval-failure';
 import {evaluate} from '../evaluator';
-import {Signature} from '../type/functions/signature';
 import {Procedure} from '../type/functions/procedure';
-import {SpecialForm, ParameterKind} from '../type/functions/special-form';
 
-import {fromDefinition} from '../type/functions/common-signature';
+// import {Signature} from '../type/functions/signature';
+import {SpecialForm} from '../type/functions/special-form';
+import {fromDescriptors, fromDefinition, Modifier} from '../type/functions/common-signature';
 
 
-const {Optional, Rest} = ParameterKind;
+const {Optional, Rest} = Modifier;
 
 
 /**
  * Monalisp `SpecialForm` for binding an `EvalForm` to an `Identifier`.
  */
 export const def = SpecialForm.of(
-  Signature.of(['id', Type.Identifier], ['form', Type.Any]),
+  fromDescriptors(['id', Type.Identifier], ['form', Type.Any]),
   (env, id: IdentifierVar, vForm: VarType) => {
     const form = evaluate(env, vForm);
     if (didEvalFail(form))
@@ -37,7 +36,7 @@ export const def = SpecialForm.of(
  * Monalisp `SpecialForm` for creating a `Procedure`.
  */
 export const fn = SpecialForm.of(
-  Signature.of(['args', Type.List], ['exprs', Type.Any, Rest]),
+  fromDescriptors(['args', Type.List], ['exprs', Type.Any, Rest]),
   (env, args: ListVar, ...exprs: ListVar[]) => {
     const signature = fromDefinition(args);
     if (didEvalFail(signature)) {
@@ -52,7 +51,7 @@ export const fn = SpecialForm.of(
  * Monalisp `SpecialForm` for returning given form unevaluated.
  */
 export const quote = SpecialForm.of(
-  Signature.of(['form', Type.Any]),
+  fromDescriptors(['form', Type.Any]),
   (_, form: VarType) => form
 );
 
@@ -61,7 +60,7 @@ export const quote = SpecialForm.of(
  * Monalisp conditional `SpecialForm`.
  */
 export const if_ = SpecialForm.of(
-  Signature.of(
+  fromDescriptors(
     ['cond', Type.Any],
     ['true-branch', Type.Any],
     ['false-branch', Type.Any, Optional]
@@ -87,7 +86,7 @@ export const if_ = SpecialForm.of(
  * Monalisp `SpecialForm` that returns first falsy-value, or last truthy-value.
  */
 export const and = SpecialForm.of(
-  Signature.of(['forms', Type.Any, Rest]),
+  fromDescriptors(['forms', Type.Any, Rest]),
   (scope, ...forms) => {
     let result: EvalResult = vlift(null);
     for (const form of forms) {
@@ -105,7 +104,7 @@ export const and = SpecialForm.of(
  * Monalisp `SpecialForm` that returns first truthy-value, or last falsy-value.
  */
 export const or = SpecialForm.of(
-  Signature.of(['forms', Type.Any, Rest]),
+  fromDescriptors(['forms', Type.Any, Rest]),
   (scope, ...forms) => {
     let result: EvalResult = vlift(null);
     for (const form of forms) {

@@ -3,12 +3,12 @@
 //------------------------------------------------------------------------------
 
 
-import {apply} from '../../../~hyfns';
 import {variable, vsrc} from '../../../common/variable';
 import {Callable} from './callable';
 import {didEvalFail} from '../../eval-failure';
-import {evalChain} from '../bind';
-import {Signature, verifyArity, typeCheck} from './signature';
+
+import {rbind} from '../../misc';
+import {Signature, verifyArity, verifyTypes, partial} from './common-signature';
 
 
 /**
@@ -44,19 +44,21 @@ export class BuiltinProcedure extends Callable {
 
   call(scope: ScopeStackType, list: ListVar) {
     // Evaluate given *parameters*
-    const parameters = apply(list.expr, evalChain(
-      verifyArity(this.signature),
-      typeCheck(this.signature)
-    ));
+    const parameters = rbind(
+      verifyArity(this.signature, list.expr),
+      verifyTypes(this.signature)
+    );
     if (didEvalFail(parameters)) {
       return parameters;
     }
 
     // Curry if parameter length is less than arity
     const {minArity} = this.signature;
-    const parameterLength = parameters.length;
-    if (parameterLength < minArity) {
-      const signature = this.signature.bind(parameterLength);
+    if (parameters.length < minArity) {
+      const signature = partial(this.signature, parameters.length);
+      if (didEvalFail(signature)) {
+        return signature;
+      }
       const body = bindParameters(this.body, parameters);
       return variable(BuiltinProcedure.of(signature, body), list.src);
     }

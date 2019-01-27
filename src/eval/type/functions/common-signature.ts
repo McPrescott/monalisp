@@ -14,7 +14,7 @@ import {isIdentifier, isKeyword, isNotIdentifier} from '../../../common/variable
 
 type ParameterDescriptor = string | [string, number?, Modifier?];
 
-enum Modifier {
+export enum Modifier {
   Required = 1,
   Optional = 2,
   Rest = 3
@@ -44,7 +44,7 @@ const idVar = (id: string) => vlift(idOf(id));
 /**
  * Convert short-hand `ParameterDescriptor` to `Parameter`.
  */
-export const fromDescriptor = (descriptor: ParameterDescriptor): Parameter => {
+const fromDescriptor = (descriptor: ParameterDescriptor): Parameter => {
   if (typeof descriptor === 'string') {
     descriptor = [descriptor];
   }

@@ -5,17 +5,19 @@
 
 import {FormFlag as Type} from '../../common/form-flag';
 import {vlift, withForms} from '../../common/variable';
-import {Signature, ParameterKind} from '../type/functions/signature';
 import {BuiltinProcedure as Builtin} from '../type/functions/builtin';
 import * as v from '../../common/variable-type-guards';
 
+
+// import {Signature, ParameterKind} from '../type/functions/signature';
+import {fromDescriptors} from '../type/functions/common-signature';
 
 
 // -- Signatures ---------------------------------------------------------------
 
 
-const predicateSignature = Signature.of('form');
-const higherOrderFnSignature = Signature.of(['fn', Type.Callable]);
+const predicateSignature = fromDescriptors('form');
+const higherOrderFnSignature = fromDescriptors(['fn', Type.Callable]);
 
 
 

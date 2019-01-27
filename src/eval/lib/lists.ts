@@ -9,25 +9,26 @@ import {FormFlag as Type} from '../../common/form-flag';
 import {variable, vlift, nil, withForms} from '../../common/variable';
 import {isList} from '../../common/variable-type-guards';
 import {didEvalFail} from '../eval-failure';
-import {Signature, ParameterKind as Kind} from '../type/functions/signature';
 import {BuiltinProcedure as Builtin} from '../type/functions/builtin';
 
+// import {Signature, ParameterKind as Kind} from '../type/functions/signature';
+import {fromDescriptors, Modifier} from '../type/functions/common-signature';
 
 
 // -- Signatures ---------------------------------------------------------------
 
 
-const {Rest} = Kind;
+const {Rest} = Modifier;
 
 const listParam: [string, number] = ['list', Type.List];
 
-const factorySignature = Signature.of(['elements', Type.Any, Rest]);
-const accessorSignature = Signature.of(['index', Type.Number], listParam);
-const unarySignature = Signature.of(listParam);
-const binarySignature = Signature.of('form', listParam);
-const variadicSignature = Signature.of(['lists', Type.List, Rest]);
-const applicativeSignature = Signature.of(['fn', Type.Callable], listParam);
-const sliceSignature = Signature.of(
+const factorySignature = fromDescriptors(['elements', Type.Any, Rest]);
+const accessorSignature = fromDescriptors(['index', Type.Number], listParam);
+const unarySignature = fromDescriptors(listParam);
+const binarySignature = fromDescriptors('form', listParam);
+const variadicSignature = fromDescriptors(['lists', Type.List, Rest]);
+const applicativeSignature = fromDescriptors(['fn', Type.Callable], listParam);
+const sliceSignature = fromDescriptors(
   ['start', Type.Number], ['end', Type.Number], listParam
 );
 

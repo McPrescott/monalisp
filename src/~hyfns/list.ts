@@ -49,7 +49,7 @@ interface Zip {
  * Get given *index* of *list* or last element in case of overflow.
  */
 export const sget = <T>(ls: T[], index: number): T => (
-  ls[Math.min(index, ls.length)]
+  ls[Math.min(index, ls.length-1)]
 );
 
 
@@ -61,7 +61,9 @@ export const zipLong = <T, U>(ls1: T[], ls2: U[]): [T, U][] => {
   const zipped: [T, U][] = [];
   const max = Math.max(ls1.length, ls2.length);
   for (let i=0; i<max; i++) {
-    zipped.push([sget(ls1, i), sget(ls2, i)]);
+    const elem1 = sget(ls1, i);
+    const elem2 = sget(ls2, i);
+    zipped.push([elem1, elem2]);
   }
   return zipped;
 }

@@ -5,8 +5,10 @@
 
 import {FormFlag} from '../../common/form-flag';
 import {vlift, withForms} from '../../common/variable';
-import {Signature, ParameterKind} from '../type/functions/signature';
 import {BuiltinProcedure as Builtin} from '../type/functions/builtin';
+
+
+import {fromDescriptors, Modifier} from '../type/functions/common-signature';
 
 
 // -- Constants ----------------------------------------------------------------
@@ -22,12 +24,12 @@ export const NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 
 // -- Functions ----------------------------------------------------------------
 
-const {Rest} = ParameterKind;
+const {Rest} = Modifier;
 
-const variadicSignature = Signature.of(['numbers', FormFlag.Number, Rest]);
-const nullarySignature = Signature.of();
-const unarySignature = Signature.of(['x', FormFlag.Number]);
-const binarySignature = Signature.of(
+const variadicSignature = fromDescriptors(['numbers', FormFlag.Number, Rest]);
+const nullarySignature = fromDescriptors();
+const unarySignature = fromDescriptors(['x', FormFlag.Number]);
+const binarySignature = fromDescriptors(
   ['x1', FormFlag.Number], ['x2', FormFlag.Number]
 );
 

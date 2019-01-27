@@ -10,16 +10,11 @@ import {apply} from '../../../~hyfns';
 import {didEvalFail} from '../../eval-failure';
 import {Callable} from './callable';
 import {evalChain} from '../bind';
-import {Signature, verifyArity, typeCheck} from './signature';
 
 
-export enum ParameterKind {
-  // Begin at one so no values are falsy
-  Required=1,
-  Optional=2,
-  Rest=3
-}
-
+// import {Signature, verifyArity, typeCheck} from './signature';
+import {Signature, verifyArity, verifyTypes} from './common-signature';
+import {rbind} from '../../misc';
 
 /**
  * Function body of a `SpecialForm`.
@@ -49,13 +44,12 @@ export class SpecialForm extends Callable {
   }
 
   call(scope: ScopeStackType, parameters: ListVar) {
-    const parameterList = apply(parameters.expr, evalChain(
-      verifyArity(this.signature),
-      typeCheck(this.signature)
-    ));
-    if (didEvalFail(parameterList)) {
-      return parameterList
-    }
-    return this.body(scope, ...parameterList);
+    return rbind(
+      rbind(
+        verifyArity(this.signature, parameters.expr),
+        verifyTypes(this.signature)
+      ),
+      (parameters) => this.body(scope, ...parameters)
+    );
   }
 }
