@@ -45,6 +45,27 @@ interface Zip {
 }
 
 
+/**
+ * Get given *index* of *list* or last element in case of overflow.
+ */
+export const sget = <T>(ls: T[], index: number): T => (
+  ls[Math.min(index, ls.length)]
+);
+
+
+/**
+ * Zip given lists, repeating the last element of the shorter list until the
+ * longer list is exhausted.
+ */
+export const zipLong = <T, U>(ls1: T[], ls2: U[]): [T, U][] => {
+  const zipped: [T, U][] = [];
+  const max = Math.max(ls1.length, ls2.length);
+  for (let i=0; i<max; i++) {
+    zipped.push([sget(ls1, i), sget(ls2, i)]);
+  }
+  return zipped;
+}
+
 // export const zip = <T=any[][]>(...lists: unknown[][]): T => {
 //   const zipped = [];
 //   let minLength = Math.min(...map(list => list.length, lists));

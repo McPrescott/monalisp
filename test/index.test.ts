@@ -1,7 +1,7 @@
 import {describe, it} from 'mocha';
 import {assert, equals, arrayEquals} from './assert';
 import {map} from '../src/~hyfns/map';
-import {Identifier} from '../src/common/identifier';
+import {Identifier, getIdentifier as idOf} from '../src/common/identifier';
 import {didParseFail} from '../src/read/parse/parser';
 import {read, evaluate, execute} from '../src/main';
 import {didEvalFail} from '../src/eval/eval-failure';
@@ -84,27 +84,34 @@ const describeSet = (title: string, ...cases: any) => {
 
 
 describe('Special Forms', () => {
-  describeExec('Variable definition',
-    '(def x (+ 20 25 30)) x', 75
+  describeSet('def',
+    `(def x 5) x`, 5,
+    `(def x "string") x`, "string",
+    `(def x 'id) x`, idOf('id')
   );
   
-  describeExec('Procedure definition', 
-    '(def add-10 (fn (y) (+ 10 y))) (add-10 30)', 40
+  describeSet('fn',
+    `((fn (x) x) 40)`, 40,
+    `((fn (x :opt y) x) 10)`, 10,
+    `((fn (x :opt y) (+ x y)) 5 5)`, 10,
+    `((fn (:rest x) x) 1 2 3 4 5)`, [1, 2, 3, 4, 5],
+    `((fn (x y :rest z) z) 1 2)`, null,
+    `(((fn (x y) (+ x y)) 1) 2)`, 3
   );
   
-  describeExec('Conditionals',
+  describeExec('if',
     '(if true (def x 5) (def x -100)) \
     (if nil (def y 100) (def y 5)) \
     (+ x y)', 10
   );
   
-  describeExec('The quote special form',
+  describeExec('quote',
     '(quote id)', (form: any) => (
-    form instanceof Identifier && form.name === 'id'
-  )
+      form instanceof Identifier && form.name === 'id'
+    )
   );
   
-  describeExec('The and/or special forms',
+  describeExec('and & or',
     '(* (and 1 2 3 4) (or 0 false nil 2 100))', 8
   );
 });
@@ -335,7 +342,7 @@ describe('Lists', () => {
   );
   
   describeExec('filter',
-    `(filter (fn (x) (= (% x 2) 0)) '(1 2 3 4 5))`, [2, 4]
+    `(filter (fn (x) (= (mod x 2) 0)) '(1 2 3 4 5))`, [2, 4]
   );
   
   describeExec('flatten',
