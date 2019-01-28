@@ -45,7 +45,7 @@ export class BuiltinProcedure extends Callable {
   call(scope: ScopeStackType, list: ListVar) {
     // Evaluate given *parameters*
     const parameters = rbind(
-      verifyArity(this.signature, list.expr),
+      verifyArity(this.signature, list.form),
       verifyTypes(this.signature)
     );
     if (didEvalFail(parameters)) {

@@ -27,7 +27,7 @@ export const def = SpecialForm.of(
     const form = evaluate(env, vForm);
     if (didEvalFail(form))
       return form;
-    return env.define(id.expr, form);
+    return env.define(id.form, form);
   }
 );
 
@@ -70,7 +70,7 @@ export const if_ = SpecialForm.of(
     if (didEvalFail(condResult)) {
       return condResult
     }
-    else if (condResult.expr) {
+    else if (condResult.form) {
       return evaluate(env, trueBranch);
     }
     else {
@@ -91,7 +91,7 @@ export const and = SpecialForm.of(
     let result: EvalResult = vlift(null);
     for (const form of forms) {
       result = evaluate(scope, form);
-      if (didEvalFail(result) || not(result.expr)) {
+      if (didEvalFail(result) || not(result.form)) {
         return result;
       }
     }
@@ -109,7 +109,7 @@ export const or = SpecialForm.of(
     let result: EvalResult = vlift(null);
     for (const form of forms) {
       result = evaluate(scope, form);
-      if (didEvalFail(result) || Boolean(result.expr)) {
+      if (didEvalFail(result) || Boolean(result.form)) {
         return result;
       }
     }

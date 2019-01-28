@@ -38,12 +38,12 @@ const nullary = (fn: () => FormType) => (
 );
 
 const unary = (fn: (x: number) => FormType) => (
-  Builtin.of(unarySignature, (_, vx) => vlift(fn(vx.expr as number)))
+  Builtin.of(unarySignature, (_, vx) => vlift(fn(vx.form as number)))
 );
 
 const binary = (fn: (x: number, y: number) => FormType) => (
   Builtin.of(binarySignature, (_, vx, vy) => 
-    vlift(fn(vx.expr as number, vy.expr as number))
+    vlift(fn(vx.form as number, vy.form as number))
   )
 );
 

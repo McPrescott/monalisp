@@ -37,7 +37,7 @@ export class Procedure extends Callable {
   }
 
   call(_, list: ListVar) {
-    const parameters = verifyArity(this.signature, list.expr);
+    const parameters = verifyArity(this.signature, list.form);
     if (didEvalFail(parameters)) {
       return parameters;
     }

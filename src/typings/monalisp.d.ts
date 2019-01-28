@@ -183,46 +183,46 @@ interface VariableBase {
 }
 
 interface NilVar extends VariableBase {
-  readonly expr: null;
+  readonly form: null;
   readonly type: 0o1;
 }
 
 interface BooleanVar extends VariableBase {
-  readonly expr: boolean;
+  readonly form: boolean;
   readonly type: 0o2;
 }
 
 interface NumberVar extends VariableBase {
-  readonly expr: number;
+  readonly form: number;
   readonly type: 0o4;
 }
 
 interface StringVar extends VariableBase {
-  readonly expr: string;
+  readonly form: string;
   readonly type: 0o10;
 }
 
 interface IdentifierVar extends VariableBase {
-  readonly expr: IdentifierType;
+  readonly form: IdentifierType;
   readonly type: 0o20;
 }
 
 interface KeywordVar extends VariableBase {
-  readonly expr: KeywordType;
+  readonly form: KeywordType;
   readonly type: 0o40;
 }
 
 interface ListVar extends VariableBase {
-  readonly expr: ListType;
+  readonly form: ListType;
   readonly type: 0o100;
 }
 
 interface DictionaryVar extends VariableBase {
-  readonly expr: DictionaryType;
+  readonly form: DictionaryType;
   readonly type: 0o200;
 }
 
 interface CallableVar extends VariableBase {
-  readonly expr: CallableType;
+  readonly form: CallableType;
   readonly type: 0o400;
 }

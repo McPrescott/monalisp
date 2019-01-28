@@ -38,7 +38,7 @@ const higherOrderFn = (fn: (env: Env, form: CallableVar) => EvalResult) => (
 // -- Builtin Logic and Predicates ---------------------------------------------
 
 
-export const not = predicate(({expr: form}) => (!form));
+export const not = predicate(({form: form}) => (!form));
 
 // Type Predicates
 

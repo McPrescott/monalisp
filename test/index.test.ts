@@ -12,10 +12,10 @@ import {pprintValues} from '../src/util';
 // -- Helpers ------------------------------------------------------------------
 
 
-const extractForm = ({expr}: any) => (
-  (Array.isArray(expr)) ? expr.map(extractForm)
-  : (expr instanceof Map) ? extractFormFromMap(expr)
-  : expr
+const extractForm = ({form}: any) => (
+  (Array.isArray(form)) ? form.map(extractForm)
+  : (form instanceof Map) ? extractFormFromMap(form)
+  : form
 );
 
 

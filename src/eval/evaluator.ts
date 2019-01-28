@@ -43,7 +43,7 @@ export const evalPrimitive: EvalFn = (
  * Evaluates `Identifier` by resolving its value from given *scope*.
  */
 export const evalIdentifier: EvalFn<IdentifierVar> = (scope, id) => (
-  scope.resolve(id.expr)
+  scope.resolve(id.form)
 );
 
 
@@ -51,9 +51,9 @@ export const evalIdentifier: EvalFn<IdentifierVar> = (scope, id) => (
  * Evaluates `List` by invoking the first element of *taggedList* as a
  * `Procedure`, with the subsequent elements as its arguments.
  */
-export const evalList: EvalFn<ListVar> = (scope, varList) => {
+export const evalList: EvalFn<ListVar> = (scope, listVar) => {
   // Retrieve procedure (first element) from expression
-  const list = varList.expr;
+  const list = listVar.form;
   const fn = evaluate(scope, head(list));
   if (didEvalFail(fn)) {
     return fn;
@@ -61,13 +61,13 @@ export const evalList: EvalFn<ListVar> = (scope, varList) => {
 
   // Ensure fn is derrived from `Callable`
   if (isNotCallable(fn)) {
-    const {src} = varList;
-    const message = `Cannot invoke ${fn.expr} as a procedure.`
+    const {src} = listVar;
+    const message = `Cannot invoke ${fn.form} as a procedure.`
     return EvalFailure.of(message, src);
   }
 
   // Call function, evaluating parameters if necessary
-  const callable = fn.expr;
+  const callable = fn.form;
   let parameters = tail(list);
   if (callable.shouldEvaluateParameters) {
     const evaluatedParameters = evaluateSequence(scope, tail(list))
@@ -75,7 +75,7 @@ export const evalList: EvalFn<ListVar> = (scope, varList) => {
       return evaluatedParameters;
     parameters = evaluatedParameters
   }
-  return callable.call(scope, variableFrom(parameters, varList) as ListVar);
+  return callable.call(scope, variableFrom(parameters, listVar) as ListVar);
 };
 
 
@@ -86,7 +86,7 @@ export const evalList: EvalFn<ListVar> = (scope, varList) => {
 export const evalDictionary: EvalFn<DictionaryVar, DictionaryVar> = (
   (scope, dictionary) => {
     let result: DictionaryType = new Map();
-    for (let [taggedKey, taggedValue] of dictionary.expr) {
+    for (let [taggedKey, taggedValue] of dictionary.form) {
       // Evaluate *key*
       let key = evaluate(scope, taggedKey);
       if (didEvalFail(key)) {

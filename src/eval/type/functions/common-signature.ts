@@ -143,7 +143,7 @@ export const fromDescriptors = (...descriptors: ParameterDescriptor[]) => (
  * Create `Signature` from Monalisp function definition.
  */
 export const fromDefinition = (listVar: ListVar): EvalResult<Signature> => {
-  const argumentList = listVar.expr;
+  const argumentList = listVar.form;
   const parameters: Parameter[] = [];
   for (let i=0; i<argumentList.length; i++) {
     const argument = argumentList[i];
@@ -157,7 +157,7 @@ export const fromDefinition = (listVar: ListVar): EvalResult<Signature> => {
     }
     // Optional or Rest Parameter
     else if (isKeyword(argument)) {
-      const {key} = argument.expr;
+      const {key} = argument.form;
       const id = argumentList[++i];
       if (!id) {
         return EvalFailure.of(signatureFailureMessage.MisplacedKey);
@@ -166,7 +166,7 @@ export const fromDefinition = (listVar: ListVar): EvalResult<Signature> => {
         return EvalFailure.of(signatureFailureMessage.UnknownKey + key);
       }
       if (isNotIdentifier(id)) {
-        return EvalFailure.of(signatureFailureMessage.BadForm + id.expr);
+        return EvalFailure.of(signatureFailureMessage.BadForm + id.form);
       }
       parameters.push({
         id,
@@ -176,7 +176,7 @@ export const fromDefinition = (listVar: ListVar): EvalResult<Signature> => {
     }
     // Invalid Form
     else {
-      return EvalFailure.of(signatureFailureMessage.BadForm + argument.expr);
+      return EvalFailure.of(signatureFailureMessage.BadForm + argument.form);
     }
   }
   return signatureOf(parameters);
@@ -236,10 +236,10 @@ export const assocParams = ({parameters}: Signature, forms: VarType[]) => {
     switch (param.modifier) {
       case Modifier.Required:
       case Modifier.Optional:
-        pairs.push([param.id.expr, forms[i]]); 
+        pairs.push([param.id.form, forms[i]]); 
       break;
       case Modifier.Rest:
-        pairs.push([param.id.expr, vlift(forms.slice(i))]);
+        pairs.push([param.id.form, vlift(forms.slice(i))]);
       break;
     }
   }

@@ -12,7 +12,7 @@ import {formFlagOf} from './form-flag';
 export const variable = (
   <T extends FormType>
   (expr: T, src: CharStream.State): VarOf<T> => (
-    {expr, src, type: formFlagOf(expr)} as VarOf<T>
+    {form: expr, src, type: formFlagOf(expr)} as VarOf<T>
   )
 );
 
@@ -29,8 +29,8 @@ export const vlift = <T extends FormType>(expr: T): VarOf<T> => (
  * Return a new `VarType` with given *expr*
  */
 export const variableFrom = (
-  <T extends FormType>(expr: T, {src, type}: VarOf<T>) => (
-    {expr, src, type}
+  <T extends FormType>(form: T, {src, type}: VarOf<T>) => (
+    {form, src, type}
   )
 );
 
@@ -41,8 +41,8 @@ export const variableFrom = (
  */
 export const vmap = (
   <T extends FormType, U extends FormType>
-  ({expr, src}: VarOf<T>, fn: (expr: T) => U): VarOf<U> => (
-    variable(fn(expr as T), src)
+  ({form, src}: VarOf<T>, fn: (expr: T) => U): VarOf<U> => (
+    variable(fn(form as T), src)
   )
 );
 
@@ -51,7 +51,7 @@ export const vmap = (
  * Return new `VarType` with given *src*.
  */
 export const vsrc = (
-  <T extends VarType>({expr}: T, src: CharStream.State): T => (
+  <T extends VarType>({form: expr}: T, src: CharStream.State): T => (
     variable(expr, src) as T
   )
 );
@@ -62,7 +62,7 @@ export const vsrc = (
  */
 export const applyForms = (
   <T>(vars: VarType[], fn: (...forms: FormType[]) => T) => (
-    fn(...vars.map(v => v.expr))
+    fn(...vars.map(v => v.form))
   )
 );
 
@@ -73,7 +73,7 @@ export const applyForms = (
 export const withForms = (
   <T extends FormType[], U>
   (fn: (...forms: T) => U) => (...vars: VarType[]): U => (
-    fn(...vars.map(v => v.expr) as T)
+    fn(...vars.map(v => v.form) as T)
   )
 );
 

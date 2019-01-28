@@ -28,12 +28,25 @@ interface RMap {
  * Monadic bind for `EvalResult`.
  */
 export const rbind: RBind = curry(
-  <A, B>(result: EvalResult<A>, f: (a: A) => EvalResult<B>): EvalResult<B> => (
-    didEvalFail(result)? result : f(result)
-  )
+  (result: EvalResult<any>, ...fns: ((a: any) => EvalResult<any>)[]) => {
+    for (const f of fns) {
+      if (didEvalFail(result)) {
+        return result;
+      }
+      result = f(result);
+    }
+    return result;
+  }
 );
 
+type M<A> = EvalResult<A>;
+type F<A, B> = (a: A) => M<B>;
+
 interface RBind {
-  <A, B>(result: EvalResult<A>, f: (a: A) => EvalResult<B>): EvalResult<B>;
-  <A, B>(result: EvalResult<A>): (f: (a: A) => EvalResult<B>) => EvalResult<B>;
+  <a, b>(m: M<a>, f: F<a, b>): M<b>;
+  <a, b, c>(m: M<a>, f: F<a, b>, g: F<b, c>): M<c>;
+  <a, b, c, d>(m: M<a>, f: F<a, b>, g: F<b, c>, h: F<c, d>): M<d>;
+  <a, b, c, d, e>(m: M<a>, f: F<a, b>, g: F<b, c>, h: F<c, d>, i: F<d, e>): M<e>;
+  <a, b, c, d, e, f>(m: M<a>, f: F<a, b>, g: F<b, c>, h: F<c, d>, i: F<d, e>, j: F<e, f>): M<f>;
+  <a, b, c, d, e, f, g>(m: M<a>, f: F<a, b>, g: F<b, c>, h: F<c, d>, i: F<d, e>, j: F<e, f>, k: F<f, g>): M<g>;
 }

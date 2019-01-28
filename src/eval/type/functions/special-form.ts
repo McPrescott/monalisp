@@ -6,13 +6,7 @@
 // TODO: Auto-curry when number of parameters is less than arity
 
 
-import {apply} from '../../../~hyfns';
-import {didEvalFail} from '../../eval-failure';
 import {Callable} from './callable';
-import {evalChain} from '../bind';
-
-
-// import {Signature, verifyArity, typeCheck} from './signature';
 import {Signature, verifyArity, verifyTypes} from './common-signature';
 import {rbind} from '../../misc';
 
@@ -45,10 +39,8 @@ export class SpecialForm extends Callable {
 
   call(scope: ScopeStackType, parameters: ListVar) {
     return rbind(
-      rbind(
-        verifyArity(this.signature, parameters.expr),
-        verifyTypes(this.signature)
-      ),
+      verifyArity(this.signature, parameters.form),
+      verifyTypes(this.signature),
       (parameters) => this.body(scope, ...parameters)
     );
   }
